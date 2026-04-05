@@ -1,0 +1,171 @@
+#include "utils.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "../include/stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "../include/stb_image_write.h"
+#include <sstream>
+#include <iomanip>
+#include <cstring>
+
+ImageData load_image(const std::string& path) {
+    ImageData img;
+    int width, height, channels;
+    unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+    if (data) {
+        img.width = width;
+        img.height = height;
+        img.channels = channels;
+        img.data.assign(data, data + (width * height * channels));
+        stbi_image_free(data);
+    }
+    return img;
+}
+
+ImageData grayscale(const ImageData& img) {
+    ImageData gray;
+    gray.width = img.width;
+    gray.height = img.height;
+    gray.channels = 1;
+    gray.data.resize(img.width * img.height);
+    
+    for (int i = 0; i < img.height; i++) {
+        for (int j = 0; j < img.width; j++) {
+            int idx = (i * img.width + j) * img.channels;
+            uint8_t r = img.data[idx];
+            uint8_t g = img.data[idx + 1];
+            uint8_t b = img.data[idx + 2];
+            gray.data[i * img.width + j] = static_cast<uint8_t>(0.299f * r + 0.587f * g + 0.114f * b);
+        }
+    }
+    return gray;
+}
+
+std::string save_image_base64(const ImageData& img) {
+    std::vector<uint8_t> png_data;
+    stbi_write_png_to_func([](void* context, void* data, int size) {
+        std::vector<uint8_t>* vec = static_cast<std::vector<uint8_t>*>(context);
+        vec->insert(vec->end(), static_cast<uint8_t*>(data), static_cast<uint8_t*>(data) + size);
+    }, &png_data, img.width, img.height, img.channels, img.data.data(), 0);
+    
+    return base64_encode(png_data);
+}
+
+std::string base64_encode(const std::vector<uint8_t>& data) {
+    static const char* chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    std::string result;
+    int i = 0;
+    uint32_t octet_a, octet_b, octet_c;
+    
+    for (size_t j = 0; j < data.size(); j += 3) {
+        octet_a = j < data.size() ? data[j] : 0;
+        octet_b = j + 1 < data.size() ? data[j + 1] : 0;
+        octet_c = j + 2 < data.size() ? data[j + 2] : 0;
+        
+        uint32_t triple = (octet_a << 16) + (octet_b << 8) + octet_c;
+        
+        result += chars[(triple >> 18) & 0x3F];
+        result += chars[(triple >> 12) & 0x3F];
+        result += chars[(triple >> 6) & 0x3F];
+        result += chars[triple & 0x3F];
+    }
+    
+    int mod = data.size() % 3;
+    if (mod == 1) {
+        result[result.size() - 1] = '=';
+        result[result.size() - 2] = '=';
+    } else if (mod == 2) {
+        result[result.size() - 1] = '=';
+    }
+    
+    return result;
+}
+
+void draw_circle(ImageData& img, int cx, int cy, int radius, uint8_t r, uint8_t g, uint8_t b) {
+    for (int y = -radius; y <= radius; y++) {
+        for (int x = -radius; x <= radius; x++) {
+            if (x*x + y*y <= radius*radius) {
+                int px = cx + x;
+                int py = cy + y;
+                if (px >= 0 && px < img.width && py >= 0 && py < img.height) {
+                    int idx = (py * img.width + px) * img.channels;
+                    if (img.channels >= 3) {
+                        img.data[idx] = r;
+                        img.data[idx + 1] = g;
+                        img.data[idx + 2] = b;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void draw_line(ImageData& img, int x1, int y1, int x2, int y2, uint8_t r, uint8_t g, uint8_t b) {
+    int dx = abs(x2 - x1);
+    int dy = abs(y2 - y1);
+    int sx = x1 < x2 ? 1 : -1;
+    int sy = y1 < y2 ? 1 : -1;
+    int err = dx - dy;
+    
+    int x = x1, y = y1;
+    while (true) {
+        if (x >= 0 && x < img.width && y >= 0 && y < img.height) {
+            int idx = (y * img.width + x) * img.channels;
+            if (img.channels >= 3) {
+                img.data[idx] = r;
+                img.data[idx + 1] = g;
+                img.data[idx + 2] = b;
+            }
+        }
+        if (x == x2 && y == y2) break;
+        int e2 = 2 * err;
+        if (e2 > -dy) { err -= dy; x += sx; }
+        if (e2 < dx) { err += dx; y += sy; }
+    }
+}
+
+ImageData decode_base64_image(const std::string& base64_str) {
+    std::vector<uint8_t> decoded = base64_decode(base64_str);
+    int width, height, channels;
+    unsigned char* data = stbi_load_from_memory(decoded.data(), decoded.size(), &width, &height, &channels, 0);
+    ImageData img;
+    if (data) {
+        img.width = width;
+        img.height = height;
+        img.channels = channels;
+        img.data.assign(data, data + (width * height * channels));
+        stbi_image_free(data);
+    }
+    return img;
+}
+
+std::vector<uint8_t> base64_decode(const std::string& encoded) {
+    static const std::string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    std::vector<uint8_t> result;
+    int i = 0;
+    uint32_t buffer = 0;
+    int bits = 0;
+    
+    for (char c : encoded) {
+        if (c == '=') break;
+        size_t idx = chars.find(c);
+        if (idx == std::string::npos) continue;
+        
+        buffer = (buffer << 6) | idx;
+        bits += 6;
+        
+        if (bits >= 8) {
+            bits -= 8;
+            result.push_back((buffer >> bits) & 0xFF);
+        }
+    }
+    return result;
+}
+
+ImageData create_blank_image(int width, int height, int channels) {
+    ImageData img;
+    img.width = width;
+    img.height = height;
+    img.channels = channels;
+    img.data.resize(width * height * channels, channels == 1 ? 128 : 255);
+    return img;
+}
