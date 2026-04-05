@@ -8,14 +8,16 @@
 .DS_Store
 
 # ===== CMake Build Output =====
+Backend//run2.bat
 Backend/build/
+Backend/build-mingw/
 build/
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
 Makefile
 *.cmake
-
+Backend/include/
 # ===== Compiled Binaries =====
 *.exe
 *.out

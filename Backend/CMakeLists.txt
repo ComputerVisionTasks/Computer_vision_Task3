@@ -28,4 +28,6 @@ add_executable(cv_server ${SOURCES})
 # Link libraries
 if(UNIX)
     target_link_libraries(cv_server pthread)
+elseif(WIN32)
+    target_link_libraries(cv_server ws2_32)
 endif()

@@ -3,8 +3,7 @@
 /* ===== NAVBAR: always dark (never transparent) ===== */
 .operations-page .header,
 .operations-page.scrolled .header {
-  --background-color: rgba(42, 44, 57, 0.97);
-  background-color: rgba(42, 44, 57, 0.97) !important;
+  background-color: black;
   box-shadow: 0 2px 18px rgba(0, 0, 0, 0.25);
 }
 
@@ -212,9 +211,9 @@
 }
 
 .ops-status.needs {
-  background: color-mix(in srgb, var(--accent-color), transparent 92%);
+  background:white;
   border: 1px solid color-mix(in srgb, var(--accent-color), transparent 70%);
-  color: var(--accent-color);
+  color: black;
 }
 
 .ops-status.ready {
@@ -232,7 +231,7 @@
 /* ===== PROCESS BUTTON ===== */
 .btn-run {
   width: 100%;
-  background: linear-gradient(135deg, var(--accent-color) 0%, #ff8c2e 100%);
+  background: black;
   color: #fff;
   border: none;
   padding: 12px 20px;
@@ -256,6 +255,7 @@
 }
 
 .btn-run:disabled {
+  background: black;
   opacity: 0.45;
   cursor: not-allowed;
   transform: none;
@@ -434,9 +434,9 @@
 }
 
 .tag-harris {
-  background: rgba(13,202,240,0.1);
-  color: #0dcaf0;
-  border: 1px solid rgba(13,202,240,0.25);
+  background: rgba(253,126,20,0.1);
+  color: #fd7e14;
+  border: 1px solid rgba(253,126,20,0.27);
 }
 
 .tag-sift {
@@ -479,7 +479,7 @@
 
 .rc-image-wrap {
   position: relative;
-  background: #1a1c26;
+  background: black;
   min-height: 220px;
   display: flex;
   align-items: center;

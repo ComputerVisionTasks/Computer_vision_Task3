@@ -94,10 +94,10 @@ MatchingResult match_ssd(const std::vector<Keypoint>& kp1, const std::vector<Key
         int x2 = static_cast<int>(kp2[match.idx2].x) + img1.width;
         int y2 = static_cast<int>(kp2[match.idx2].y);
         
-        // Color based on distance (better matches = greener)
-        uint8_t r = static_cast<uint8_t>(std::min(255, static_cast<int>(match.distance * 50)));
-        uint8_t g = static_cast<uint8_t>(std::min(255, static_cast<int>(255 - match.distance * 30)));
-        uint8_t b = 100;
+      
+        uint8_t r = 255;
+        uint8_t g = 255;
+        uint8_t b = 255;
         
         draw_line(vis, x1, y1, x2, y2, r, g, b);
     }
@@ -187,8 +187,8 @@ MatchingResult match_ncc(const std::vector<Keypoint>& kp1, const std::vector<Key
         int x2 = static_cast<int>(kp2[match.idx2].x) + img1.width;
         int y2 = static_cast<int>(kp2[match.idx2].y);
         
-        // Cyan for NCC matches
-        draw_line(vis, x1, y1, x2, y2, 0, 255, 255);
+        // White for NCC matches
+        draw_line(vis, x1, y1, x2, y2, 255, 255, 255);
     }
     
     auto end = std::chrono::high_resolution_clock::now();
