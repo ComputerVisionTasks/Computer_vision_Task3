@@ -1,0 +1,384 @@
+/*--------------------------------------------------------------
+# Operations Page Specific Styles
+# Extends main.css with operations-specific styling
+--------------------------------------------------------------*/
+
+/* Operation Cards */
+.operation-card {
+  background: var(--surface-color);
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(239, 102, 3, 0.1);
+}
+
+.operation-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  border-color: rgba(239, 102, 3, 0.2);
+}
+
+.operation-card h3,
+.operation-card h4 {
+  margin-bottom: 1rem;
+  color: var(--heading-color);
+}
+
+.operation-card h3 i,
+.operation-card h4 i {
+  color: var(--accent-color);
+  margin-right: 10px;
+}
+
+/* Upload Card */
+.upload-card {
+  background: var(--surface-color);
+  border-radius: 24px;
+  padding: 2rem;
+  text-align: center;
+  border: 2px dashed rgba(239, 102, 3, 0.3);
+  transition: all 0.3s ease;
+}
+
+.upload-card:hover {
+  border-color: var(--accent-color);
+  background: rgba(239, 102, 3, 0.02);
+}
+
+.drop-zone {
+  cursor: pointer;
+  padding: 3rem;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.drop-zone.drag-over {
+  background: rgba(239, 102, 3, 0.1);
+  border-color: var(--accent-color);
+}
+
+.drop-zone p {
+  margin: 1rem 0;
+  color: var(--default-color);
+  opacity: 0.7;
+}
+
+/* Image Gallery */
+.image-gallery {
+  background: var(--surface-color);
+  border-radius: 24px;
+  padding: 1.5rem;
+}
+
+.gallery-item {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.gallery-item:hover {
+  transform: scale(1.02);
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.gallery-item .overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+  color: white;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+/* Progress Indicators */
+.operation-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(239, 102, 3, 0.05);
+  border-radius: 12px;
+  margin-top: 1rem;
+}
+
+.spinner-border.text-accent {
+  color: var(--accent-color);
+}
+
+/* Results Container */
+.results-container {
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.image-comparison {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.image-comparison img {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.image-comparison img:hover {
+  transform: scale(1.02);
+}
+
+/* Badge Styles */
+.badge-time {
+  background: linear-gradient(135deg, var(--accent-color), #ff8c42);
+  color: white;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 40px;
+  display: inline-block;
+  font-weight: 600;
+}
+
+.info-badge {
+  background: rgba(239, 102, 3, 0.1);
+  border-left: 3px solid var(--accent-color);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: var(--default-color);
+  display: inline-block;
+  margin: 0.5rem 0;
+}
+
+.info-badge i {
+  color: var(--accent-color);
+  margin-right: 0.5rem;
+}
+
+/* Match Info */
+.match-info {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.match-visualization img {
+  width: 100%;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.match-visualization img:hover {
+  transform: scale(1.01);
+}
+
+/* Performance Table */
+.performance-table {
+  margin-bottom: 0;
+}
+
+.performance-table th {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 1rem;
+}
+
+.performance-table td {
+  padding: 1rem;
+  vertical-align: middle;
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
+.performance-table tr:hover {
+  background: rgba(239, 102, 3, 0.03);
+}
+
+/* Upload Progress Bar */
+.upload-progress {
+  margin-top: 1.5rem;
+}
+
+.progress {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+  background: var(--accent-color);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* Buttons */
+.btn-primary {
+  background: var(--accent-color);
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 50px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: #e05a00;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 102, 3, 0.3);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-outline-accent {
+  border: 2px solid var(--accent-color);
+  background: transparent;
+  color: var(--accent-color);
+  padding: 0.5rem 1.5rem;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.btn-outline-accent:hover {
+  background: var(--accent-color);
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .operation-card {
+    padding: 1.5rem;
+  }
+  
+  .drop-zone {
+    padding: 2rem;
+  }
+  
+  .image-comparison {
+    grid-template-columns: 1fr;
+  }
+  
+  .match-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .performance-table {
+    font-size: 0.85rem;
+  }
+  
+  .performance-table td,
+  .performance-table th {
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .operation-card .btn-primary {
+    width: 100%;
+    margin-top: 1rem;
+  }
+  
+  .operation-card .row.align-items-center {
+    text-align: center;
+  }
+  
+  .operation-card .text-lg-end {
+    text-align: center !important;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .operation-card {
+    background: var(--surface-color);
+  }
+  
+  .upload-card {
+    background: var(--surface-color);
+  }
+  
+  .info-badge {
+    background: rgba(239, 102, 3, 0.15);
+  }
+  
+  .performance-table tr:hover {
+    background: rgba(239, 102, 3, 0.08);
+  }
+}
+
+/* Loading State for Buttons */
+.btn-loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.btn-loading i {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Tooltip Styles */
+[data-tooltip] {
+  position: relative;
+  cursor: help;
+}
+
+[data-tooltip]:before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--heading-color);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+[data-tooltip]:hover:before {
+  opacity: 1;
+}

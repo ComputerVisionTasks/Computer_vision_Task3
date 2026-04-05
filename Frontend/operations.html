@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>CV Studio | Operations Hub</title>
+  <meta name="description" content="Run Harris corner detection, SIFT feature extraction, and feature matching on your images.">
+  <meta name="keywords" content="Harris corner detector, SIFT, SSD, NCC, feature matching, computer vision">
+
+  <!-- Favicons -->
+  <link href="assets/img/logo3-small.png" rel="icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/vendor/animate.css/animate.min.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+  <!-- CSS Files -->
+  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/operation.css" rel="stylesheet">
+</head>
+
+<body class="operations-page">
+
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+      <a href="index.html" class="logo d-flex align-items-center">
+        <img src="assets/img/Logo-Cv-3.png" alt="VisionLab Logo" class="logo-img">
+      </a>
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="operations.html" class="active">Operations</a></li>
+          <li><a href="#upload">Upload</a></li>
+          <li><a href="#harris">Harris</a></li>
+          <li><a href="#sift">SIFT</a></li>
+          <li><a href="#matching">Matching</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- Hero Section -->
+    <section id="hero" class="hero section dark-background" style="padding: 120px 0 60px 0;">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 mx-auto text-center" data-aos="fade-up">
+            <h2 class="animate__animated animate__fadeInDown">Computer Vision <span>Operations</span></h2>
+            <p class="animate__animated animate__fadeInUp">Upload your images and run Harris corner detection, SIFT feature extraction, and feature matching (SSD vs NCC) with real-time performance metrics.</p>
+          </div>
+        </div>
+      </div>
+      <svg class="hero-waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none">
+        <defs><path id="wave-path" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"></path></defs>
+        <g class="wave1"><use xlink:href="#wave-path" x="50" y="3"></use></g>
+        <g class="wave2"><use xlink:href="#wave-path" x="50" y="0"></use></g>
+        <g class="wave3"><use xlink:href="#wave-path" x="50" y="9"></use></g>
+      </svg>
+    </section>
+
+    <!-- Upload Section -->
+    <section id="upload" class="section">
+      <div class="container">
+        <div class="section-title" data-aos="fade-up">
+          <h2>Image Upload</h2>
+          <p>Upload your images (supports grayscale & color)</p>
+        </div>
+
+        <div class="row justify-content-center">
+          <div class="col-lg-8" data-aos="fade-up">
+            <div class="upload-card">
+              <div class="drop-zone" id="dropZone">
+                <i class="bi bi-cloud-upload" style="font-size: 48px; color: var(--accent-color);"></i>
+                <p>Drag & drop images here or click to browse</p>
+                <input type="file" id="fileInput" multiple accept="image/jpeg,image/jpg,image/png,image/bmp" style="display: none;">
+                <button class="btn btn-outline-accent" onclick="document.getElementById('fileInput').click()">
+                  <i class="bi bi-folder2-open"></i> Browse Files
+                </button>
+              </div>
+              <div id="uploadProgress" class="upload-progress" style="display: none;">
+                <div class="progress">
+                  <div class="progress-bar" role="progressbar" style="width: 0%">0%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Image Gallery -->
+        <div id="imageGallery" class="image-gallery mt-5" style="display: none;">
+          <h4 class="mb-3"><i class="bi bi-images"></i> Uploaded Images</h4>
+          <div class="row g-3" id="galleryContainer"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Harris Corner Detection Card -->
+    <section id="harris" class="section light-background">
+      <div class="container">
+        <div class="operation-card" data-aos="fade-up">
+          <div class="row align-items-center">
+            <div class="col-lg-8">
+              <h3><i class="bi bi-binoculars"></i> Harris Corner Detection</h3>
+              <p>Detects distinctive interest points using the second-moment matrix. Robust to rotation and illumination changes.</p>
+              <div class="info-badge">
+                <i class="bi bi-info-circle"></i> 
+                <span>Quality threshold: 0.01 | Min distance: 10px | Block size: 2 | k: 0.04</span>
+              </div>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+              <button class="btn btn-primary btn-lg" id="runHarrisBtn" onclick="runHarris()">
+                <i class="bi bi-play-fill"></i> Run Harris Detection
+              </button>
+            </div>
+          </div>
+          <div id="harrisProgress" class="operation-progress" style="display: none;">
+            <div class="spinner-border text-accent" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <span class="ms-2">Processing Harris corner detection...</span>
+          </div>
+          <div id="harrisResults" class="results-container mt-4" style="display: none;">
+            <div class="row">
+              <div class="col-md-6">
+                <h5>Original Images</h5>
+                <div class="image-comparison" id="harrisOriginal"></div>
+              </div>
+              <div class="col-md-6">
+                <h5>Harris Corners <span class="badge-time" id="harrisTime"></span></h5>
+                <div class="image-comparison" id="harrisResult"></div>
+              </div>
+            </div>
+            <div class="text-center mt-3">
+              <button class="btn btn-sm btn-outline-secondary" onclick="downloadResults('harris')">
+                <i class="bi bi-download"></i> Download Results
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SIFT Feature Extraction Card -->
+    <section id="sift" class="section">
+      <div class="container">
+        <div class="operation-card" data-aos="fade-up">
+          <div class="row align-items-center">
+            <div class="col-lg-8">
+              <h3><i class="bi bi-box-seam"></i> SIFT Feature Extraction</h3>
+              <p>Scale-Invariant Feature Transform: 128-dimensional descriptors per keypoint. Robust to scaling, rotation, and affine distortion.</p>
+              <div class="info-badge">
+                <i class="bi bi-info-circle"></i> 
+                <span>Features: 0 (auto) | Octave layers: 3 | Contrast threshold: 0.04 | Edge threshold: 10</span>
+              </div>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+              <button class="btn btn-primary btn-lg" id="runSiftBtn" onclick="runSIFT()">
+                <i class="bi bi-play-fill"></i> Run SIFT Extraction
+              </button>
+            </div>
+          </div>
+          <div id="siftProgress" class="operation-progress" style="display: none;">
+            <div class="spinner-border text-accent" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <span class="ms-2">Extracting SIFT features...</span>
+          </div>
+          <div id="siftResults" class="results-container mt-4" style="display: none;">
+            <div class="row">
+              <div class="col-md-6">
+                <h5>Original Images</h5>
+                <div class="image-comparison" id="siftOriginal"></div>
+              </div>
+              <div class="col-md-6">
+                <h5>SIFT Keypoints <span class="badge-time" id="siftTime"></span></h5>
+                <div class="image-comparison" id="siftResult"></div>
+              </div>
+            </div>
+            <div class="text-center mt-3">
+              <button class="btn btn-sm btn-outline-secondary" onclick="downloadResults('sift')">
+                <i class="bi bi-download"></i> Download Results
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feature Matching Section -->
+    <section id="matching" class="section light-background">
+      <div class="container">
+        <div class="section-title" data-aos="fade-up">
+          <h2>Feature Matching</h2>
+          <p>SSD vs NCC: Compare matching algorithms</p>
+        </div>
+
+        <div class="row g-4">
+          <!-- SSD Matching Card -->
+          <div class="col-lg-6" data-aos="fade-up">
+            <div class="operation-card">
+              <h4><i class="bi bi-link"></i> SSD Matching</h4>
+              <p>Sum of Squared Differences (Euclidean distance) - Fast and efficient for well-lit scenes.</p>
+              <div class="info-badge mb-3">
+                <i class="bi bi-info-circle"></i>
+                <span>Ratio threshold: 0.75 | Lower distance = better match</span>
+              </div>
+              <button class="btn btn-primary" id="runSsdBtn" onclick="runMatching('ssd')">
+                <i class="bi bi-play-fill"></i> Run SSD Matching
+              </button>
+              <div id="ssdProgress" class="operation-progress mt-3" style="display: none;">
+                <div class="spinner-border spinner-border-sm text-accent" role="status"></div>
+                <span class="ms-2">Matching with SSD...</span>
+              </div>
+              <div id="ssdResults" class="mt-4" style="display: none;">
+                <div class="match-info">
+                  <span class="badge-time" id="ssdTime"></span>
+                  <span class="badge bg-secondary" id="ssdMatches"></span>
+                </div>
+                <div class="match-visualization mt-3">
+                  <img id="ssdVisualization" src="" alt="SSD matches" class="img-fluid rounded shadow">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- NCC Matching Card -->
+          <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+            <div class="operation-card">
+              <h4><i class="bi bi-stars"></i> NCC Matching</h4>
+              <p>Normalized Cross-Correlation - More robust to illumination changes and noise.</p>
+              <div class="info-badge mb-3">
+                <i class="bi bi-info-circle"></i>
+                <span>Ratio threshold: 0.75 | Higher correlation = better match</span>
+              </div>
+              <button class="btn btn-primary" id="runNccBtn" onclick="runMatching('ncc')">
+                <i class="bi bi-play-fill"></i> Run NCC Matching
+              </button>
+              <div id="nccProgress" class="operation-progress mt-3" style="display: none;">
+                <div class="spinner-border spinner-border-sm text-accent" role="status"></div>
+                <span class="ms-2">Matching with NCC...</span>
+              </div>
+              <div id="nccResults" class="mt-4" style="display: none;">
+                <div class="match-info">
+                  <span class="badge-time" id="nccTime"></span>
+                  <span class="badge bg-secondary" id="nccMatches"></span>
+                </div>
+                <div class="match-visualization mt-3">
+                  <img id="nccVisualization" src="" alt="NCC matches" class="img-fluid rounded shadow">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Performance Summary Table -->
+    <section id="performance-summary" class="section">
+      <div class="container">
+        <div class="section-title" data-aos="fade-up">
+          <h2>Performance Summary</h2>
+          <p>Real-time computation metrics</p>
+        </div>
+        <div class="row justify-content-center" data-aos="fade-up">
+          <div class="col-lg-10">
+            <div class="metric-card">
+              <table class="table performance-table" id="performanceTable">
+                <thead>
+                  <tr>
+                    <th>Operation</th>
+                    <th>Computation Time (ms)</th>
+                    <th>Key Metrics</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr id="perfHarris">
+                    <td><i class="bi bi-binoculars"></i> Harris Corner Detection</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td><span class="badge bg-secondary">Pending</span></td>
+                  </tr>
+                  <tr id="perfSift">
+                    <td><i class="bi bi-box-seam"></i> SIFT Features</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td><span class="badge bg-secondary">Pending</span></td>
+                  </tr>
+                  <tr id="perfSsd">
+                    <td><i class="bi bi-link"></i> SSD Matching</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td><span class="badge bg-secondary">Pending</span></td>
+                  </tr>
+                  <tr id="perfNcc">
+                    <td><i class="bi bi-stars"></i> NCC Matching</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td><span class="badge bg-secondary">Pending</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="footer" class="footer dark-background">
+    <div class="container">
+      <h3 class="sitename">
+        <img src="assets/img/Logo-Cv-3.png" style="height:40px; vertical-align:middle; margin-right:10px;">
+        Pixelize
+      </h3>
+      <p>Harris · SIFT · SSD · NCC — classical computer vision feature matching benchmark.</p>
+      <div class="social-links d-flex justify-content-center">
+        <a href="#"><i class="bi bi-twitter-x"></i></a>
+        <a href="#"><i class="bi bi-facebook"></i></a>
+        <a href="#"><i class="bi bi-instagram"></i></a>
+        <a href="#"><i class="bi bi-skype"></i></a>
+        <a href="#"><i class="bi bi-linkedin"></i></a>
+      </div>
+      <div class="container">
+        <div class="copyright">
+          <span>© Pixelize Team | Feature Detection & Matching Report</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/operation.js"></script>
+  <script>
+    AOS.init({ duration: 800, once: true });
+  </script>
+</body>
+
+</html>
