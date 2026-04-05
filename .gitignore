@@ -1,6 +1,65 @@
-# IDE files
+# ===== IDE & Editor =====
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+*.DS_Store
+.DS_Store
+
+# ===== CMake Build Output =====
+Backend/build/
+build/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+
+# ===== Compiled Binaries =====
+*.exe
+*.out
+*.o
+*.obj
+*.lib
+*.dll
+*.so
+*.dylib
+*.pdb
+*.ilk
+*.exp
+
+# ===== Visual Studio artifacts =====
+*.vcxproj.user
+*.sln
+*.suo
+*.ncb
+*.aps
+*.vcxproj.filters
+x64/
+Debug/
+Release/
+ipch/
+.vs/
+
+# ===== MSBuild / intermediate =====
+*.log
+*.tlog
+*.lastbuildstate
+*.unsuccessfulbuild
+
+# ===== MinGW / GCC intermediate =====
+*.d
+
+# ===== Node / Frontend tooling =====
+node_modules/
+dist/
+.cache/
+
+# ===== OS files =====
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ===== Antigravity agent internals =====
+.antigravityignore

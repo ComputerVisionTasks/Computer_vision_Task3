@@ -4,28 +4,25 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>CV Studio | Operations Hub</title>
-  <meta name="description" content="Run Harris corner detection, SIFT feature extraction, and feature matching on your images.">
-  <meta name="keywords" content="Harris corner detector, SIFT, SSD, NCC, feature matching, computer vision">
+  <title>CV Studio | Operations Dashboard</title>
+  <meta name="description" content="Interactive computer vision operations: Harris corner detection, SIFT feature extraction, SSD and NCC matching.">
 
-  <!-- Favicons -->
   <link href="assets/img/logo3-small.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
 
-  <!-- Fonts -->
+  <!-- Fonts — identical to index.html -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&family=Raleway:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Vendor CSS Files -->
+  <!-- Vendor CSS — identical to index.html -->
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/vendor/aos/aos.css" rel="stylesheet">
-  <link href="assets/vendor/animate.css/animate.min.css" rel="stylesheet">
-  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
-  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
-  <!-- CSS Files -->
+  <!-- Main CSS (design tokens, header, nav, footer) -->
   <link href="assets/css/main.css" rel="stylesheet">
+  <!-- Operations-specific CSS -->
   <link href="assets/css/operation.css" rel="stylesheet">
 </head>
 
@@ -34,325 +31,546 @@
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
       <a href="index.html" class="logo d-flex align-items-center">
-        <img src="assets/img/Logo-Cv-3.png" alt="VisionLab Logo" class="logo-img">
+        <img src="assets\img\Logo-Cv-3.png" alt="VisionLab Logo" class="logo-img">
       </a>
       <nav id="navmenu" class="navmenu">
         <ul>
-          <li><a href="index.html">Home</a></li>
-          <li><a href="operations.html" class="active">Operations</a></li>
-          <li><a href="#upload">Upload</a></li>
-          <li><a href="#harris">Harris</a></li>
-          <li><a href="#sift">SIFT</a></li>
-          <li><a href="#matching">Matching</a></li>
+          <li><a href="index.html" >Home</a></li>
+          <li><a href="#features">Pipeline</a></li>
+          <li><a href="#services">Matching</a></li>
+          <li><a href="operations.html"class="active">Get Started</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
     </div>
   </header>
 
-  <main class="main">
-    <!-- Hero Section -->
-    <section id="hero" class="hero section dark-background" style="padding: 120px 0 60px 0;">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-8 mx-auto text-center" data-aos="fade-up">
-            <h2 class="animate__animated animate__fadeInDown">Computer Vision <span>Operations</span></h2>
-            <p class="animate__animated animate__fadeInUp">Upload your images and run Harris corner detection, SIFT feature extraction, and feature matching (SSD vs NCC) with real-time performance metrics.</p>
+  <!-- ===== MAIN ===== -->
+  <main class="main operations-main">
+    <!-- Two-column layout -->
+    <div class="ops-container">
+
+      <!-- ===== SIDEBAR ===== -->
+      <aside class="ops-sidebar">
+
+        <!-- Upload slots -->
+        <span class="sidebar-label"><i class="bi bi-cloud-upload me-1"></i> Upload Images</span>
+
+        <div class="upload-slots">
+
+          <!-- Slot 1 -->
+          <div class="upload-slot" id="slot1">
+            <input type="file" id="fileInput1" class="hidden-input" accept="image/jpeg,image/png,image/jpg">
+            <div class="slot-empty">
+              <div class="slot-number">1</div>
+              <strong>Image 1</strong>
+              <span>Click or drag &amp; drop</span>
+            </div>
+            <div class="slot-filled">
+              <img class="slot-thumb" id="thumb1" alt="">
+              <div class="slot-meta">
+                <span class="slot-name" id="name1"></span>
+                <span class="slot-size" id="size1"></span>
+              </div>
+              <span class="slot-badge">Ready</span>
+              <button class="slot-remove" id="remove1"><i class="bi bi-x"></i></button>
+            </div>
+          </div>
+
+          <!-- Slot 2 -->
+          <div class="upload-slot" id="slot2">
+            <input type="file" id="fileInput2" class="hidden-input" accept="image/jpeg,image/png,image/jpg">
+            <div class="slot-empty">
+              <div class="slot-number">2</div>
+              <strong>Image 2</strong>
+              <span>Click or drag &amp; drop</span>
+            </div>
+            <div class="slot-filled">
+              <img class="slot-thumb" id="thumb2" alt="">
+              <div class="slot-meta">
+                <span class="slot-name" id="name2"></span>
+                <span class="slot-size" id="size2"></span>
+              </div>
+              <span class="slot-badge">Ready</span>
+              <button class="slot-remove" id="remove2"><i class="bi bi-x"></i></button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Status -->
+        <div class="ops-status needs" id="opsStatus">
+          <i class="bi bi-info-circle-fill"></i>
+          <span id="statusText">Upload 2 images to begin</span>
+        </div>
+
+        <!-- Run Button -->
+        <button class="btn-run" id="processBtn" disabled>
+          <i class="bi bi-play-fill"></i> Run Analysis
+        </button>
+
+        <!-- Performance Metrics -->
+        <span class="sidebar-label"><i class="bi bi-speedometer2 me-1"></i> Performance</span>
+        <div class="metrics-grid">
+          <div class="metric-block">
+            <span class="metric-name">Harris</span>
+            <span class="metric-val" id="metricHarris">—</span>
+          </div>
+          <div class="metric-block">
+            <span class="metric-name">SIFT</span>
+            <span class="metric-val" id="metricSIFT">—</span>
+          </div>
+          <div class="metric-block">
+            <span class="metric-name">SSD</span>
+            <span class="metric-val" id="metricSSD">—</span>
+          </div>
+          <div class="metric-block">
+            <span class="metric-name">NCC</span>
+            <span class="metric-val" id="metricNCC">—</span>
           </div>
         </div>
-      </div>
-      <svg class="hero-waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none">
-        <defs><path id="wave-path" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"></path></defs>
-        <g class="wave1"><use xlink:href="#wave-path" x="50" y="3"></use></g>
-        <g class="wave2"><use xlink:href="#wave-path" x="50" y="0"></use></g>
-        <g class="wave3"><use xlink:href="#wave-path" x="50" y="9"></use></g>
-      </svg>
-    </section>
 
-    <!-- Upload Section -->
-    <section id="upload" class="section">
-      <div class="container">
-        <div class="section-title" data-aos="fade-up">
-          <h2>Image Upload</h2>
-          <p>Upload your images (supports grayscale & color)</p>
+      </aside>
+
+      <!-- ===== CONTENT PANEL ===== -->
+      <div class="ops-content">
+
+        <!-- Tab nav -->
+        <div class="ops-tabs-nav">
+          <button class="ops-tab-btn active" data-tab="harris">
+            <i class="bi bi-binoculars"></i> Harris
+          </button>
+          <button class="ops-tab-btn" data-tab="sift">
+            <i class="bi bi-box-seam"></i> SIFT
+          </button>
+          <button class="ops-tab-btn" data-tab="matching">
+            <i class="bi bi-link-45deg"></i> Matching
+          </button>
+          <button class="ops-tab-btn" data-tab="comparison">
+            <i class="bi bi-layout-split"></i> Comparison
+          </button>
         </div>
 
-        <div class="row justify-content-center">
-          <div class="col-lg-8" data-aos="fade-up">
-            <div class="upload-card">
-              <div class="drop-zone" id="dropZone">
-                <i class="bi bi-cloud-upload" style="font-size: 48px; color: var(--accent-color);"></i>
-                <p>Drag & drop images here or click to browse</p>
-                <input type="file" id="fileInput" multiple accept="image/jpeg,image/jpg,image/png,image/bmp" style="display: none;">
-                <button class="btn btn-outline-accent" onclick="document.getElementById('fileInput').click()">
-                  <i class="bi bi-folder2-open"></i> Browse Files
-                </button>
-              </div>
-              <div id="uploadProgress" class="upload-progress" style="display: none;">
-                <div class="progress">
-                  <div class="progress-bar" role="progressbar" style="width: 0%">0%</div>
+        <!-- Empty state (before any processing) -->
+        <div class="ops-empty" id="opsEmpty">
+          <div class="empty-icon"><i class="bi bi-cpu"></i></div>
+          <h3>Ready to Analyse</h3>
+          <p>Upload two images in the sidebar, then click <strong>Run Analysis</strong> to start the Harris → SIFT → Matching pipeline.</p>
+        </div>
+
+        <!-- ====== TAB: Harris ====== -->
+        <div class="ops-tab-pane active" id="tab-harris">
+          <div class="results-grid">
+
+            <div class="result-card">
+              <div class="rc-head">
+                <div class="rc-title"><span class="tag tag-harris">HARRIS</span> Image 1</div>
+                <div class="rc-stats">
+                  <span class="rc-stat highlight"><i class="bi bi-geo-alt-fill"></i> <span id="harris1Count">—</span></span>
+                  <span class="rc-stat"><i class="bi bi-clock"></i> <span id="harris1Time">—</span></span>
                 </div>
               </div>
+              <div class="rc-image-wrap" id="harris1Wrap">
+                <div class="ph-state"><i class="bi bi-image"></i><span>Awaiting result</span></div>
+                <img class="result-img" id="harris1Img" alt="" style="display:none">
+                <div class="loading-overlay" id="harris1Loading"><div class="spin"></div><span>Detecting corners…</span></div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Image Gallery -->
-        <div id="imageGallery" class="image-gallery mt-5" style="display: none;">
-          <h4 class="mb-3"><i class="bi bi-images"></i> Uploaded Images</h4>
-          <div class="row g-3" id="galleryContainer"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Harris Corner Detection Card -->
-    <section id="harris" class="section light-background">
-      <div class="container">
-        <div class="operation-card" data-aos="fade-up">
-          <div class="row align-items-center">
-            <div class="col-lg-8">
-              <h3><i class="bi bi-binoculars"></i> Harris Corner Detection</h3>
-              <p>Detects distinctive interest points using the second-moment matrix. Robust to rotation and illumination changes.</p>
-              <div class="info-badge">
-                <i class="bi bi-info-circle"></i> 
-                <span>Quality threshold: 0.01 | Min distance: 10px | Block size: 2 | k: 0.04</span>
-              </div>
-            </div>
-            <div class="col-lg-4 text-lg-end">
-              <button class="btn btn-primary btn-lg" id="runHarrisBtn" onclick="runHarris()">
-                <i class="bi bi-play-fill"></i> Run Harris Detection
-              </button>
-            </div>
-          </div>
-          <div id="harrisProgress" class="operation-progress" style="display: none;">
-            <div class="spinner-border text-accent" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-            <span class="ms-2">Processing Harris corner detection...</span>
-          </div>
-          <div id="harrisResults" class="results-container mt-4" style="display: none;">
-            <div class="row">
-              <div class="col-md-6">
-                <h5>Original Images</h5>
-                <div class="image-comparison" id="harrisOriginal"></div>
-              </div>
-              <div class="col-md-6">
-                <h5>Harris Corners <span class="badge-time" id="harrisTime"></span></h5>
-                <div class="image-comparison" id="harrisResult"></div>
-              </div>
-            </div>
-            <div class="text-center mt-3">
-              <button class="btn btn-sm btn-outline-secondary" onclick="downloadResults('harris')">
-                <i class="bi bi-download"></i> Download Results
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SIFT Feature Extraction Card -->
-    <section id="sift" class="section">
-      <div class="container">
-        <div class="operation-card" data-aos="fade-up">
-          <div class="row align-items-center">
-            <div class="col-lg-8">
-              <h3><i class="bi bi-box-seam"></i> SIFT Feature Extraction</h3>
-              <p>Scale-Invariant Feature Transform: 128-dimensional descriptors per keypoint. Robust to scaling, rotation, and affine distortion.</p>
-              <div class="info-badge">
-                <i class="bi bi-info-circle"></i> 
-                <span>Features: 0 (auto) | Octave layers: 3 | Contrast threshold: 0.04 | Edge threshold: 10</span>
-              </div>
-            </div>
-            <div class="col-lg-4 text-lg-end">
-              <button class="btn btn-primary btn-lg" id="runSiftBtn" onclick="runSIFT()">
-                <i class="bi bi-play-fill"></i> Run SIFT Extraction
-              </button>
-            </div>
-          </div>
-          <div id="siftProgress" class="operation-progress" style="display: none;">
-            <div class="spinner-border text-accent" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-            <span class="ms-2">Extracting SIFT features...</span>
-          </div>
-          <div id="siftResults" class="results-container mt-4" style="display: none;">
-            <div class="row">
-              <div class="col-md-6">
-                <h5>Original Images</h5>
-                <div class="image-comparison" id="siftOriginal"></div>
-              </div>
-              <div class="col-md-6">
-                <h5>SIFT Keypoints <span class="badge-time" id="siftTime"></span></h5>
-                <div class="image-comparison" id="siftResult"></div>
-              </div>
-            </div>
-            <div class="text-center mt-3">
-              <button class="btn btn-sm btn-outline-secondary" onclick="downloadResults('sift')">
-                <i class="bi bi-download"></i> Download Results
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Feature Matching Section -->
-    <section id="matching" class="section light-background">
-      <div class="container">
-        <div class="section-title" data-aos="fade-up">
-          <h2>Feature Matching</h2>
-          <p>SSD vs NCC: Compare matching algorithms</p>
-        </div>
-
-        <div class="row g-4">
-          <!-- SSD Matching Card -->
-          <div class="col-lg-6" data-aos="fade-up">
-            <div class="operation-card">
-              <h4><i class="bi bi-link"></i> SSD Matching</h4>
-              <p>Sum of Squared Differences (Euclidean distance) - Fast and efficient for well-lit scenes.</p>
-              <div class="info-badge mb-3">
-                <i class="bi bi-info-circle"></i>
-                <span>Ratio threshold: 0.75 | Lower distance = better match</span>
-              </div>
-              <button class="btn btn-primary" id="runSsdBtn" onclick="runMatching('ssd')">
-                <i class="bi bi-play-fill"></i> Run SSD Matching
-              </button>
-              <div id="ssdProgress" class="operation-progress mt-3" style="display: none;">
-                <div class="spinner-border spinner-border-sm text-accent" role="status"></div>
-                <span class="ms-2">Matching with SSD...</span>
-              </div>
-              <div id="ssdResults" class="mt-4" style="display: none;">
-                <div class="match-info">
-                  <span class="badge-time" id="ssdTime"></span>
-                  <span class="badge bg-secondary" id="ssdMatches"></span>
-                </div>
-                <div class="match-visualization mt-3">
-                  <img id="ssdVisualization" src="" alt="SSD matches" class="img-fluid rounded shadow">
+            <div class="result-card">
+              <div class="rc-head">
+                <div class="rc-title"><span class="tag tag-harris">HARRIS</span> Image 2</div>
+                <div class="rc-stats">
+                  <span class="rc-stat highlight"><i class="bi bi-geo-alt-fill"></i> <span id="harris2Count">—</span></span>
+                  <span class="rc-stat"><i class="bi bi-clock"></i> <span id="harris2Time">—</span></span>
                 </div>
               </div>
+              <div class="rc-image-wrap" id="harris2Wrap">
+                <div class="ph-state"><i class="bi bi-image"></i><span>Awaiting result</span></div>
+                <img class="result-img" id="harris2Img" alt="" style="display:none">
+                <div class="loading-overlay" id="harris2Loading"><div class="spin"></div><span>Detecting corners…</span></div>
+              </div>
             </div>
-          </div>
 
-          <!-- NCC Matching Card -->
-          <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
-            <div class="operation-card">
-              <h4><i class="bi bi-stars"></i> NCC Matching</h4>
-              <p>Normalized Cross-Correlation - More robust to illumination changes and noise.</p>
-              <div class="info-badge mb-3">
-                <i class="bi bi-info-circle"></i>
-                <span>Ratio threshold: 0.75 | Higher correlation = better match</span>
-              </div>
-              <button class="btn btn-primary" id="runNccBtn" onclick="runMatching('ncc')">
-                <i class="bi bi-play-fill"></i> Run NCC Matching
-              </button>
-              <div id="nccProgress" class="operation-progress mt-3" style="display: none;">
-                <div class="spinner-border spinner-border-sm text-accent" role="status"></div>
-                <span class="ms-2">Matching with NCC...</span>
-              </div>
-              <div id="nccResults" class="mt-4" style="display: none;">
-                <div class="match-info">
-                  <span class="badge-time" id="nccTime"></span>
-                  <span class="badge bg-secondary" id="nccMatches"></span>
-                </div>
-                <div class="match-visualization mt-3">
-                  <img id="nccVisualization" src="" alt="NCC matches" class="img-fluid rounded shadow">
+          </div>
+        </div>
+
+        <!-- ====== TAB: SIFT ====== -->
+        <div class="ops-tab-pane" id="tab-sift">
+          <div class="results-grid">
+
+            <div class="result-card">
+              <div class="rc-head">
+                <div class="rc-title"><span class="tag tag-sift">SIFT</span> Image 1</div>
+                <div class="rc-stats">
+                  <span class="rc-stat highlight"><i class="bi bi-stars"></i> <span id="sift1Count">—</span></span>
+                  <span class="rc-stat"><i class="bi bi-clock"></i> <span id="sift1Time">—</span></span>
                 </div>
               </div>
+              <div class="rc-image-wrap" id="sift1Wrap">
+                <div class="ph-state"><i class="bi bi-image"></i><span>Awaiting result</span></div>
+                <img class="result-img" id="sift1Img" alt="" style="display:none">
+                <div class="loading-overlay" id="sift1Loading"><div class="spin"></div><span>Extracting features…</span></div>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- Performance Summary Table -->
-    <section id="performance-summary" class="section">
-      <div class="container">
-        <div class="section-title" data-aos="fade-up">
-          <h2>Performance Summary</h2>
-          <p>Real-time computation metrics</p>
-        </div>
-        <div class="row justify-content-center" data-aos="fade-up">
-          <div class="col-lg-10">
-            <div class="metric-card">
-              <table class="table performance-table" id="performanceTable">
-                <thead>
-                  <tr>
-                    <th>Operation</th>
-                    <th>Computation Time (ms)</th>
-                    <th>Key Metrics</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr id="perfHarris">
-                    <td><i class="bi bi-binoculars"></i> Harris Corner Detection</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td><span class="badge bg-secondary">Pending</span></td>
-                  </tr>
-                  <tr id="perfSift">
-                    <td><i class="bi bi-box-seam"></i> SIFT Features</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td><span class="badge bg-secondary">Pending</span></td>
-                  </tr>
-                  <tr id="perfSsd">
-                    <td><i class="bi bi-link"></i> SSD Matching</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td><span class="badge bg-secondary">Pending</span></td>
-                  </tr>
-                  <tr id="perfNcc">
-                    <td><i class="bi bi-stars"></i> NCC Matching</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td><span class="badge bg-secondary">Pending</span></td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="result-card">
+              <div class="rc-head">
+                <div class="rc-title"><span class="tag tag-sift">SIFT</span> Image 2</div>
+                <div class="rc-stats">
+                  <span class="rc-stat highlight"><i class="bi bi-stars"></i> <span id="sift2Count">—</span></span>
+                  <span class="rc-stat"><i class="bi bi-clock"></i> <span id="sift2Time">—</span></span>
+                </div>
+              </div>
+              <div class="rc-image-wrap" id="sift2Wrap">
+                <div class="ph-state"><i class="bi bi-image"></i><span>Awaiting result</span></div>
+                <img class="result-img" id="sift2Img" alt="" style="display:none">
+                <div class="loading-overlay" id="sift2Loading"><div class="spin"></div><span>Extracting features…</span></div>
+              </div>
             </div>
+
           </div>
         </div>
-      </div>
-    </section>
+
+        <!-- ====== TAB: Matching ====== -->
+        <div class="ops-tab-pane" id="tab-matching">
+          <div class="matching-grid">
+
+            <div class="match-card">
+              <div class="match-head">
+                <div class="match-title"><span class="tag tag-ssd">SSD</span> Sum of Squared Differences</div>
+                <div class="rc-stats">
+                  <span class="rc-stat highlight"><i class="bi bi-link"></i> <span id="ssdCount">—</span></span>
+                  <span class="rc-stat"><i class="bi bi-clock"></i> <span id="ssdTime">—</span></span>
+                </div>
+              </div>
+              <div class="rc-image-wrap">
+                <div class="ph-state"><i class="bi bi-image-alt"></i><span>Run analysis to view matches</span></div>
+                <img class="result-img" id="ssdImg" alt="" style="display:none">
+                <div class="loading-overlay" id="ssdLoading"><div class="spin"></div><span>Matching…</span></div>
+              </div>
+            </div>
+
+            <div class="match-card">
+              <div class="match-head">
+                <div class="match-title"><span class="tag tag-ncc">NCC</span> Normalized Cross-Correlation</div>
+                <div class="rc-stats">
+                  <span class="rc-stat highlight"><i class="bi bi-link"></i> <span id="nccCount">—</span></span>
+                  <span class="rc-stat"><i class="bi bi-clock"></i> <span id="nccTime">—</span></span>
+                </div>
+              </div>
+              <div class="rc-image-wrap">
+                <div class="ph-state"><i class="bi bi-image-alt"></i><span>Run analysis to view matches</span></div>
+                <img class="result-img" id="nccImg" alt="" style="display:none">
+                <div class="loading-overlay" id="nccLoading"><div class="spin"></div><span>Matching…</span></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ====== TAB: Comparison ====== -->
+        <div class="ops-tab-pane" id="tab-comparison">
+          <div class="comparison-grid">
+
+            <div class="comparison-card">
+              <div class="comparison-card-head"><span class="tag tag-harris">HARRIS</span> Image 1</div>
+              <img id="compareHarris1" alt="">
+            </div>
+            <div class="comparison-card">
+              <div class="comparison-card-head"><span class="tag tag-harris">HARRIS</span> Image 2</div>
+              <img id="compareHarris2" alt="">
+            </div>
+            <div class="comparison-card">
+              <div class="comparison-card-head"><span class="tag tag-sift">SIFT</span> Image 1</div>
+              <img id="compareSift1" alt="">
+            </div>
+            <div class="comparison-card">
+              <div class="comparison-card-head"><span class="tag tag-sift">SIFT</span> Image 2</div>
+              <img id="compareSift2" alt="">
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /ops-content -->
+    </div><!-- /ops-container -->
+
   </main>
 
+  <!-- ===== FOOTER (exact copy from index.html) ===== -->
   <footer id="footer" class="footer dark-background">
     <div class="container">
       <h3 class="sitename">
-        <img src="assets/img/Logo-Cv-3.png" style="height:40px; vertical-align:middle; margin-right:10px;">
+        <img src="assets/img/Logo-Cv-3.png" style="height:40px; vertical-align:middle; margin-right:10px;" alt="logo">
         Pixelize
       </h3>
       <p>Harris · SIFT · SSD · NCC — classical computer vision feature matching benchmark.</p>
       <div class="social-links d-flex justify-content-center">
-        <a href="#"><i class="bi bi-twitter-x"></i></a>
-        <a href="#"><i class="bi bi-facebook"></i></a>
-        <a href="#"><i class="bi bi-instagram"></i></a>
-        <a href="#"><i class="bi bi-skype"></i></a>
-        <a href="#"><i class="bi bi-linkedin"></i></a>
+        <a href=""><i class="bi bi-twitter-x"></i></a>
+        <a href=""><i class="bi bi-facebook"></i></a>
+        <a href=""><i class="bi bi-instagram"></i></a>
+        <a href=""><i class="bi bi-linkedin"></i></a>
       </div>
       <div class="container">
         <div class="copyright">
-          <span>© Pixelize Team | Feature Detection & Matching Report</span>
+          <span>© Pixelize Team | Feature Detection &amp; Matching Report</span>
         </div>
       </div>
     </div>
   </footer>
 
-  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center">
+    <i class="bi bi-arrow-up-short"></i>
+  </a>
   <div id="preloader"></div>
 
-  <!-- Vendor JS Files -->
+  <!-- Vendor JS — same as index.html so nav/scroll/preloader work -->
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/vendor/aos/aos.js"></script>
-  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
-  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
   <script src="assets/js/main.js"></script>
-  <script src="assets/js/operation.js"></script>
+
+  <!-- Operations Logic -->
   <script>
+    const API_BASE = 'http://localhost:8080';
+    let images = [null, null];
+
+    // ===== SLOT SETUP =====
+    function setupSlot(slotId, inputId, removeId, idx) {
+      const slot   = document.getElementById(slotId);
+      const input  = document.getElementById(inputId);
+      const remove = document.getElementById(removeId);
+
+      slot.addEventListener('click', (e) => {
+        if (e.target.closest('.slot-remove')) return;
+        input.click();
+      });
+
+      input.addEventListener('change', (e) => {
+        if (e.target.files[0]) loadSlot(idx, e.target.files[0]);
+        input.value = '';
+      });
+
+      slot.addEventListener('dragover', (e) => { e.preventDefault(); slot.classList.add('dragging'); });
+      slot.addEventListener('dragleave', () => slot.classList.remove('dragging'));
+      slot.addEventListener('drop', (e) => {
+        e.preventDefault();
+        slot.classList.remove('dragging');
+        const f = e.dataTransfer.files[0];
+        if (f && f.type.startsWith('image/')) loadSlot(idx, f);
+      });
+
+      remove.addEventListener('click', (e) => { e.stopPropagation(); clearSlot(idx); });
+    }
+
+    function loadSlot(idx, file) {
+      images[idx] = file;
+      const n = idx + 1;
+      const reader = new FileReader();
+      reader.onload = (ev) => { document.getElementById('thumb' + n).src = ev.target.result; };
+      reader.readAsDataURL(file);
+      document.getElementById('name' + n).textContent = file.name;
+      document.getElementById('size' + n).textContent = fmtSize(file.size);
+      document.getElementById('slot' + n).classList.add('has-image');
+      updateStatus();
+    }
+
+    function clearSlot(idx) {
+      images[idx] = null;
+      const n = idx + 1;
+      document.getElementById('thumb' + n).src = '';
+      document.getElementById('name' + n).textContent = '';
+      document.getElementById('size' + n).textContent = '';
+      document.getElementById('slot' + n).classList.remove('has-image');
+      updateStatus();
+    }
+
+    function fmtSize(b) {
+      if (b < 1024) return b + ' B';
+      if (b < 1048576) return (b/1024).toFixed(0) + ' KB';
+      return (b/1048576).toFixed(1) + ' MB';
+    }
+
+    function updateStatus() {
+      const n = images.filter(Boolean).length;
+      const sb = document.getElementById('opsStatus');
+      const st = document.getElementById('statusText');
+      const btn = document.getElementById('processBtn');
+      if (n === 0) {
+        sb.className = 'ops-status needs';
+        st.textContent = 'Upload 2 images to begin';
+        btn.disabled = true;
+      } else if (n === 1) {
+        sb.className = 'ops-status needs';
+        st.textContent = 'Upload 1 more image';
+        btn.disabled = true;
+      } else {
+        sb.className = 'ops-status ready';
+        st.innerHTML = '<i class="bi bi-check-circle-fill"></i>&nbsp; Both images ready';
+        btn.disabled = false;
+      }
+    }
+
+    setupSlot('slot1', 'fileInput1', 'remove1', 0);
+    setupSlot('slot2', 'fileInput2', 'remove2', 1);
+
+    // ===== TABS =====
+    document.querySelectorAll('.ops-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.ops-tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.ops-tab-pane').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        const pane = document.getElementById('tab-' + btn.dataset.tab);
+        if (pane) pane.classList.add('active');
+        document.getElementById('opsEmpty').style.display = 'none';
+      });
+    });
+
+    // ===== PROCESS =====
+    document.getElementById('processBtn').addEventListener('click', async () => {
+      if (!images[0] || !images[1]) return;
+
+      const btn = document.getElementById('processBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spin" style="width:14px;height:14px;border-width:2px"></div>&nbsp;Processing…';
+
+      const sb = document.getElementById('opsStatus');
+      sb.className = 'ops-status running';
+      sb.innerHTML = '<i class="bi bi-cpu-fill"></i>&nbsp; Pipeline running…';
+
+      // Show harris tab, hide empty state
+      document.getElementById('opsEmpty').style.display = 'none';
+      document.querySelectorAll('.ops-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.ops-tab-pane').forEach(p => p.classList.remove('active'));
+      document.querySelector('[data-tab="harris"]').classList.add('active');
+      document.getElementById('tab-harris').classList.add('active');
+
+      try {
+        const b64 = await Promise.all(images.map(toBase64));
+        const upResp = await fetch(`${API_BASE}/api/upload`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ images: b64.map(d => d.split(',')[1]) })
+        });
+        const upData = await upResp.json();
+        if (!upData.success) throw new Error('Upload failed');
+
+        await runHarris();
+        await runSIFT();
+        await runSSD();
+        await runNCC();
+        syncComparison();
+
+        sb.className = 'ops-status ready';
+        sb.innerHTML = '<i class="bi bi-check-circle-fill"></i>&nbsp; Analysis complete!';
+      } catch (err) {
+        console.error(err);
+        alert('Error: ' + err.message);
+        sb.className = 'ops-status needs';
+        sb.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i>&nbsp; Error — try again';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-play-fill"></i> Run Analysis';
+      }
+    });
+
+    function toBase64(file) {
+      return new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
+    }
+
+    function revealImg(imgId, wrapId, b64) {
+      const img = document.getElementById(imgId);
+      img.src = 'data:image/png;base64,' + b64;
+      img.style.display = 'block';
+      if (wrapId) {
+        const ph = document.getElementById(wrapId).querySelector('.ph-state');
+        if (ph) ph.style.display = 'none';
+      }
+    }
+
+    function loader(id, on) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('active', on);
+    }
+
+    async function runHarris() {
+      loader('harris1Loading', true); loader('harris2Loading', true);
+      try {
+        const data = await fetch(`${API_BASE}/api/harris`, {method:'POST'}).then(r => r.json());
+        if (data.success && data.results) {
+          const r0 = data.results[0], r1 = data.results[1];
+          if (r0) { revealImg('harris1Img','harris1Wrap',r0.image); setText('harris1Count', r0.num_corners+' pts'); setText('harris1Time', r0.time_ms.toFixed(1)+' ms'); setText('metricHarris', r0.time_ms.toFixed(0)+' ms'); }
+          if (r1) { revealImg('harris2Img','harris2Wrap',r1.image); setText('harris2Count', r1.num_corners+' pts'); setText('harris2Time', r1.time_ms.toFixed(1)+' ms'); }
+        }
+      } finally { loader('harris1Loading', false); loader('harris2Loading', false); }
+    }
+
+    async function runSIFT() {
+      loader('sift1Loading', true); loader('sift2Loading', true);
+      try {
+        const data = await fetch(`${API_BASE}/api/sift`, {method:'POST'}).then(r => r.json());
+        if (data.success && data.results) {
+          const r0 = data.results[0], r1 = data.results[1];
+          if (r0) { revealImg('sift1Img','sift1Wrap',r0.image); setText('sift1Count', r0.num_keypoints+' kp'); setText('sift1Time', r0.time_ms.toFixed(1)+' ms'); setText('metricSIFT', r0.time_ms.toFixed(0)+' ms'); }
+          if (r1) { revealImg('sift2Img','sift2Wrap',r1.image); setText('sift2Count', r1.num_keypoints+' kp'); setText('sift2Time', r1.time_ms.toFixed(1)+' ms'); }
+        }
+      } finally { loader('sift1Loading', false); loader('sift2Loading', false); }
+    }
+
+    async function runSSD() {
+      loader('ssdLoading', true);
+      try {
+        const data = await fetch(`${API_BASE}/api/match-ssd`, {method:'POST'}).then(r => r.json());
+        if (data.success) {
+          const img = document.getElementById('ssdImg');
+          img.src = 'data:image/png;base64,' + data.image;
+          img.style.display = 'block';
+          const ph = img.closest('.rc-image-wrap').querySelector('.ph-state');
+          if (ph) ph.style.display = 'none';
+          setText('ssdCount', data.num_matches+' matches');
+          setText('ssdTime', data.time_ms.toFixed(1)+' ms');
+          setText('metricSSD', data.time_ms.toFixed(0)+' ms');
+        }
+      } finally { loader('ssdLoading', false); }
+    }
+
+    async function runNCC() {
+      loader('nccLoading', true);
+      try {
+        const data = await fetch(`${API_BASE}/api/match-ncc`, {method:'POST'}).then(r => r.json());
+        if (data.success) {
+          const img = document.getElementById('nccImg');
+          img.src = 'data:image/png;base64,' + data.image;
+          img.style.display = 'block';
+          const ph = img.closest('.rc-image-wrap').querySelector('.ph-state');
+          if (ph) ph.style.display = 'none';
+          setText('nccCount', data.num_matches+' matches');
+          setText('nccTime', data.time_ms.toFixed(1)+' ms');
+          setText('metricNCC', data.time_ms.toFixed(0)+' ms');
+        }
+      } finally { loader('nccLoading', false); }
+    }
+
+    function syncComparison() {
+      const map = { compareHarris1:'harris1Img', compareHarris2:'harris2Img', compareSift1:'sift1Img', compareSift2:'sift2Img' };
+      Object.entries(map).forEach(([dst, src]) => {
+        const s = document.getElementById(src);
+        if (s && s.src) document.getElementById(dst).src = s.src;
+      });
+    }
+
+    function setText(id, val) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    }
+
     AOS.init({ duration: 800, once: true });
   </script>
-</body>
 
+</body>
 </html>
