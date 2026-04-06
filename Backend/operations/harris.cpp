@@ -121,7 +121,7 @@ HarrisResult detect_harris_corners(const ImageData& img, float k, int threshold,
     // Draw result
     ImageData result = img;
     for (const auto& kp : keypoints) {
-        draw_circle(result, static_cast<int>(kp.x), static_cast<int>(kp.y), 3, 0, 255, 0);
+        draw_circle(result, static_cast<int>(kp.x), static_cast<int>(kp.y), 3,199, 30, 100);
     }
     
     auto end = std::chrono::high_resolution_clock::now();

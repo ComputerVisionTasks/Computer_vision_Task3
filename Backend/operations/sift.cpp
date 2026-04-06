@@ -462,10 +462,10 @@ SIFTResult extract_sift_features(const ImageData& img) {
     // ---- visualise ----
     ImageData out = img;
     for (const auto& kp : kps) {
-        draw_circle(out, (int)kp.x, (int)kp.y, 4, 255, 255, 255);
+        draw_circle(out, (int)kp.x, (int)kp.y, 4, 199, 30, 100);
         int x2 = (int)(kp.x + 8.0f * std::cos(kp.orientation));
         int y2 = (int)(kp.y + 8.0f * std::sin(kp.orientation));
-        draw_line(out, (int)kp.x, (int)kp.y, x2, y2, 255, 255, 255);
+        draw_line(out, (int)kp.x, (int)kp.y, x2, y2, 199, 30, 100);
     }
 
     auto t1 = std::chrono::high_resolution_clock::now();

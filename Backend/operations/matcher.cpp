@@ -94,10 +94,9 @@ MatchingResult match_ssd(const std::vector<Keypoint>& kp1, const std::vector<Key
         int x2 = static_cast<int>(kp2[match.idx2].x) + img1.width;
         int y2 = static_cast<int>(kp2[match.idx2].y);
         
-      
-        uint8_t r = 255;
-        uint8_t g = 255;
-        uint8_t b = 255;
+        uint8_t r = 199;
+        uint8_t g = 30;
+        uint8_t b = 100;
         
         draw_line(vis, x1, y1, x2, y2, r, g, b);
     }
@@ -188,7 +187,7 @@ MatchingResult match_ncc(const std::vector<Keypoint>& kp1, const std::vector<Key
         int y2 = static_cast<int>(kp2[match.idx2].y);
         
         // White for NCC matches
-        draw_line(vis, x1, y1, x2, y2, 255, 255, 255);
+        draw_line(vis, x1, y1, x2, y2, 199, 30, 100);
     }
     
     auto end = std::chrono::high_resolution_clock::now();
