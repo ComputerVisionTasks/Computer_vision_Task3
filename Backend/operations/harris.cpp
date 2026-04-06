@@ -170,12 +170,12 @@ HarrisResult detect_harris_corners(const ImageData& img, float k, int /*threshol
         }
     }
     
-    // Keep top 500 by response strength
+    // Keep top 3000 by response strength
     std::sort(keypoints.begin(), keypoints.end(),
               [](const Keypoint& a, const Keypoint& b) {
                   return a.response > b.response;
               });
-    if (keypoints.size() > 500) keypoints.resize(500);
+    if (keypoints.size() > 3000) keypoints.resize(3000);
     
     // Draw result
     ImageData result = img;
