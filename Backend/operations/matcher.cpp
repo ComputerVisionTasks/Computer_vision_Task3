@@ -143,8 +143,8 @@ static ImageData build_vis(const ImageData& img1, const ImageData& img2,
         draw_line(vis, x1, y1, x2, y2, r, g, b, 3);
         
         // Draw circles at start and end points
-        draw_circle(vis, x1, y1, 10, r, g, b);
-        draw_circle(vis, x2, y2, 10, r, g, b);
+        draw_circle(vis, x1, y1, 8, r, g, b);
+        draw_circle(vis, x2, y2, 8, r, g, b);
     }
 
     return vis;
