@@ -171,7 +171,7 @@ static bool refine(
 
 static bool edge_response_ok(
         const std::vector<std::vector<float>>& dog_layer,
-        int y, int x, float r_thresh = 10.0f) {
+        int y, int x, float r_thresh = 7.0f) {
 
     float v   = dog_layer[y][x];
     float dxx = dog_layer[y][x+1] - 2.0f*v + dog_layer[y][x-1];
@@ -392,7 +392,7 @@ SIFTResult extract_sift_features(const ImageData& img) {
     // ---- detect & describe keypoints ----
     std::vector<Keypoint> kps;
 
-    const float contrast_thresh = 0.04f / (float)(lvl - 3); // per-level threshold
+    const float contrast_thresh = 0.06f / (float)(lvl - 3); // per-level threshold
 
     for (int o = 0; o < oct; o++) {
         int nd = (int)D[o].size();

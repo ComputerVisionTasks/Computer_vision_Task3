@@ -39,7 +39,7 @@ ImageData resize_image(const ImageData& img, int new_width, int new_height);
 std::string base64_encode(const std::vector<uint8_t>& data);
 std::vector<uint8_t> base64_decode(const std::string& encoded);
 void draw_circle(ImageData& img, int x, int y, int radius, uint8_t r, uint8_t g, uint8_t b);
-void draw_line(ImageData& img, int x1, int y1, int x2, int y2, uint8_t r, uint8_t g, uint8_t b);
+void draw_line(ImageData& img, int x1, int y1, int x2, int y2, uint8_t r, uint8_t g, uint8_t b, int thickness = 1);
 ImageData decode_base64_image(const std::string& base64_str);
 
 #endif

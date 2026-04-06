@@ -99,7 +99,7 @@ void draw_circle(ImageData& img, int cx, int cy, int radius, uint8_t r, uint8_t 
     }
 }
 
-void draw_line(ImageData& img, int x1, int y1, int x2, int y2, uint8_t r, uint8_t g, uint8_t b) {
+void draw_line(ImageData& img, int x1, int y1, int x2, int y2, uint8_t r, uint8_t g, uint8_t b, int thickness) {
     int dx = abs(x2 - x1);
     int dy = abs(y2 - y1);
     int sx = x1 < x2 ? 1 : -1;
@@ -108,14 +108,23 @@ void draw_line(ImageData& img, int x1, int y1, int x2, int y2, uint8_t r, uint8_
     
     int x = x1, y = y1;
     while (true) {
-        if (x >= 0 && x < img.width && y >= 0 && y < img.height) {
-            int idx = (y * img.width + x) * img.channels;
-            if (img.channels >= 3) {
-                img.data[idx] = r;
-                img.data[idx + 1] = g;
-                img.data[idx + 2] = b;
+        // Draw a square of size (thickness x thickness) centered at (x, y)
+        int offset = thickness / 2;
+        for (int ty = -offset; ty <= offset; ty++) {
+            for (int tx = -offset; tx <= offset; tx++) {
+                int px = x + tx;
+                int py = y + ty;
+                if (px >= 0 && px < img.width && py >= 0 && py < img.height) {
+                    int idx = (py * img.width + px) * img.channels;
+                    if (img.channels >= 3) {
+                        img.data[idx] = r;
+                        img.data[idx + 1] = g;
+                        img.data[idx + 2] = b;
+                    }
+                }
             }
         }
+        
         if (x == x2 && y == y2) break;
         int e2 = 2 * err;
         if (e2 > -dy) { err -= dy; x += sx; }
@@ -168,4 +177,43 @@ ImageData create_blank_image(int width, int height, int channels) {
     img.channels = channels;
     img.data.resize(width * height * channels, channels == 1 ? 128 : 255);
     return img;
+}
+
+ImageData resize_image(const ImageData& img, int new_width, int new_height) {
+    if (img.width == new_width && img.height == new_height) return img;
+    ImageData resized;
+    resized.width = new_width;
+    resized.height = new_height;
+    resized.channels = img.channels;
+    resized.data.resize(new_width * new_height * img.channels);
+
+    float scale_x = static_cast<float>(img.width - 1) / (new_width - 1 > 0 ? new_width - 1 : 1);
+    float scale_y = static_cast<float>(img.height - 1) / (new_height - 1 > 0 ? new_height - 1 : 1);
+
+    for (int y = 0; y < new_height; y++) {
+        for (int x = 0; x < new_width; x++) {
+            float gx = x * scale_x;
+            float gy = y * scale_y;
+            int gxi = static_cast<int>(gx);
+            int gyi = static_cast<int>(gy);
+            int gxi1 = std::min(gxi + 1, img.width - 1);
+            int gyi1 = std::min(gyi + 1, img.height - 1);
+            float dx = gx - gxi;
+            float dy = gy - gyi;
+
+            for (int c = 0; c < img.channels; c++) {
+                float c00 = img.data[(gyi * img.width + gxi) * img.channels + c];
+                float c10 = img.data[(gyi * img.width + gxi1) * img.channels + c];
+                float c01 = img.data[(gyi1 * img.width + gxi) * img.channels + c];
+                float c11 = img.data[(gyi1 * img.width + gxi1) * img.channels + c];
+
+                float val = c00 * (1 - dx) * (1 - dy) +
+                            c10 * dx * (1 - dy) +
+                            c01 * (1 - dx) * dy +
+                            c11 * dx * dy;
+                resized.data[(y * new_width + x) * img.channels + c] = static_cast<uint8_t>(val);
+            }
+        }
+    }
+    return resized;
 }
