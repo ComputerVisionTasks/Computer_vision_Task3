@@ -155,7 +155,12 @@ async function processHarris() {
     showLoading('harris2Loading', true);
     
     try {
-        const response = await fetch(`${API_BASE}/api/harris`, { method: 'POST' });
+        const method = document.getElementById('cornerMethod').value;
+        const response = await fetch(`${API_BASE}/api/harris`, { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ method: method })
+        });
         const data = await response.json();
         
         if (data.success && data.results) {

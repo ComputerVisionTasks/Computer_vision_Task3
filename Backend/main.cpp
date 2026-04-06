@@ -1,6 +1,7 @@
 #include "include/httplib.h"
 #include "include/json.hpp"
 #include "operations/harris.h"
+#include "operations/lambda.h"
 #include "operations/sift.h"
 #include "operations/matcher.h"
 #include "operations/utils.h"
@@ -125,7 +126,7 @@ int main() {
         res.set_content(response.dump(), "application/json");
     });
     
-    // Harris endpoint
+    // Harris/Shi-Tomasi endpoint
     svr.Post("/api/harris", [](const httplib::Request& req, httplib::Response& res) {
         json response;
         
@@ -135,18 +136,45 @@ int main() {
             res.set_content(response.dump(), "application/json");
             return;
         }
+
+        std::string method = "harris";
+        if (!req.body.empty()) {
+            try {
+                auto json_body = json::parse(req.body);
+                if (json_body.contains("method")) {
+                    method = json_body["method"].get<std::string>();
+                }
+            } catch (...) {}
+        }
         
         harris_results.clear();
         std::vector<json> harris_data;
         
         for (size_t i = 0; i < std::min(size_t(2), uploaded_images.size()); i++) {
-            HarrisResult hr = detect_harris_corners(uploaded_images[i]);
-            harris_results.push_back(hr);
-            
             json result_json;
-            result_json["image"] = save_image_base64(hr.result_image);
-            result_json["num_corners"] = hr.num_corners;
-            result_json["time_ms"] = hr.time_ms;
+            if (method == "shi_tomasi") {
+                // Lower threshold significantly for Shi-Tomasi: scales with gradient squared
+                ShiTomasiResult hr = detect_shi_tomasi(uploaded_images[i], 0.05f, 100, 3);
+                // Store in harris_results to maintain compatibility for downstream pipeline
+                HarrisResult compat_hr;
+                compat_hr.keypoints = hr.keypoints;
+                compat_hr.result_image = hr.result_image;
+                compat_hr.time_ms = hr.time_ms;
+                compat_hr.num_corners = hr.num_corners;
+                harris_results.push_back(compat_hr);
+                
+                result_json["image"] = save_image_base64(hr.result_image);
+                result_json["num_corners"] = hr.num_corners;
+                result_json["time_ms"] = hr.time_ms;
+            } else {
+                // Lower threshold for Harris: scales with gradient fourth power
+                HarrisResult hr = detect_harris_corners(uploaded_images[i], 0.05f, 5000, 3);
+                harris_results.push_back(hr);
+                
+                result_json["image"] = save_image_base64(hr.result_image);
+                result_json["num_corners"] = hr.num_corners;
+                result_json["time_ms"] = hr.time_ms;
+            }
             harris_data.push_back(result_json);
         }
         

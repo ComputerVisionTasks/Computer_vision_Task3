@@ -18,6 +18,7 @@ set(SOURCES
     main.cpp
     operations/utils.cpp
     operations/harris.cpp
+    operations/lambda.cpp
     operations/sift.cpp
     operations/matcher.cpp
 )

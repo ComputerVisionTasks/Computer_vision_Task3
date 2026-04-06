@@ -104,6 +104,15 @@
           <span id="statusText">Upload 2 images to begin</span>
         </div>
 
+        <!-- Method Setting -->
+        <div id="cornerMethodContainer">
+          <span class="sidebar-label"><i class="bi bi-gear me-1"></i> Detection Method</span>
+          <select id="cornerMethod" class="form-select custom-select mb-3" style="background-color: #1a1a2e; color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; width: 100%;">
+            <option value="harris">Harris Corner Detection</option>
+            <option value="shi_tomasi">Shi-Tomasi (λ-) Detection</option>
+          </select>
+        </div>
+
         <!-- Run Button -->
         <button class="btn-run" id="processBtn" disabled>
           <i class="bi bi-play-fill"></i> Run Analysis
@@ -423,6 +432,12 @@
         const pane = document.getElementById('tab-' + btn.dataset.tab);
         if (pane) pane.classList.add('active');
         document.getElementById('opsEmpty').style.display = 'none';
+
+        // Hide Method dropdown when not on Harris tab
+        const methodContainer = document.getElementById('cornerMethodContainer');
+        if (methodContainer) {
+          methodContainer.style.display = btn.dataset.tab === 'harris' ? 'block' : 'none';
+        }
       });
     });
 
@@ -501,7 +516,13 @@
     async function runHarris() {
       loader('harris1Loading', true); loader('harris2Loading', true);
       try {
-        const data = await fetch(`${API_BASE}/api/harris`, {method:'POST'}).then(r => r.json());
+        const method = document.getElementById('cornerMethod').value;
+        const res = await fetch(`${API_BASE}/api/harris`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ method: method })
+        });
+        const data = await res.json();
         if (data.success && data.results) {
           const r0 = data.results[0], r1 = data.results[1];
           if (r0) { revealImg('harris1Img','harris1Wrap',r0.image); setText('harris1Count', r0.num_corners+' pts'); setText('harris1Time', r0.time_ms.toFixed(1)+' ms'); setText('metricHarris', r0.time_ms.toFixed(0)+' ms'); }
