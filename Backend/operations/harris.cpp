@@ -7,95 +7,147 @@
 
 static std::vector<std::vector<float>> compute_elementwise_product(const std::vector<std::vector<float>>& a, const std::vector<std::vector<float>>& b);
 
+// ─────────────────────────────────────────────────────────────
+//  Sobel gradient computation (proper 3×3 kernels)
+//
+//  Sobel-X:  [-1  0  1]      Sobel-Y:  [-1 -2 -1]
+//            [-2  0  2]                [ 0  0  0]
+//            [-1  0  1]                [ 1  2  1]
+//
+//  Divides by 8 to normalize the kernel weights.
+// ─────────────────────────────────────────────────────────────
+
 std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> compute_gradients(const ImageData& gray) {
     int w = gray.width, h = gray.height;
     std::vector<std::vector<float>> Ix(h, std::vector<float>(w, 0));
     std::vector<std::vector<float>> Iy(h, std::vector<float>(w, 0));
     
-    // Sobel operators
     for (int y = 1; y < h - 1; y++) {
         for (int x = 1; x < w - 1; x++) {
-            int idx = y * w + x;
-            Ix[y][x] = (gray.data[(y) * w + (x+1)] - gray.data[(y) * w + (x-1)]) / 2.0f;
-            Iy[y][x] = (gray.data[(y+1) * w + x] - gray.data[(y-1) * w + x]) / 2.0f;
+            // Sobel-X
+            float gx = -1.0f * gray.data[(y-1) * w + (x-1)]
+                      + 1.0f * gray.data[(y-1) * w + (x+1)]
+                      - 2.0f * gray.data[(y)   * w + (x-1)]
+                      + 2.0f * gray.data[(y)   * w + (x+1)]
+                      - 1.0f * gray.data[(y+1) * w + (x-1)]
+                      + 1.0f * gray.data[(y+1) * w + (x+1)];
+
+            // Sobel-Y
+            float gy = -1.0f * gray.data[(y-1) * w + (x-1)]
+                      - 2.0f * gray.data[(y-1) * w + (x)]
+                      - 1.0f * gray.data[(y-1) * w + (x+1)]
+                      + 1.0f * gray.data[(y+1) * w + (x-1)]
+                      + 2.0f * gray.data[(y+1) * w + (x)]
+                      + 1.0f * gray.data[(y+1) * w + (x+1)];
+
+            Ix[y][x] = gx / 8.0f;
+            Iy[y][x] = gy / 8.0f;
         }
     }
     return std::make_pair(Ix, Iy);
 }
 
-std::vector<std::vector<float>> gaussian_blur(const std::vector<std::vector<float>>& img, float sigma) {
+// ─────────────────────────────────────────────────────────────
+//  Separable Gaussian blur with proper boundary normalization
+// ─────────────────────────────────────────────────────────────
+
+std::vector<std::vector<float>> gaussian_blur_harris(const std::vector<std::vector<float>>& img, float sigma) {
     int h = img.size(), w = img[0].size();
     int kernel_size = static_cast<int>(6 * sigma) | 1;
+    int half = kernel_size / 2;
     std::vector<float> kernel(kernel_size);
     float sum = 0;
     
     for (int i = 0; i < kernel_size; i++) {
-        int x = i - kernel_size / 2;
+        int x = i - half;
         kernel[i] = exp(-(x * x) / (2 * sigma * sigma));
         sum += kernel[i];
     }
     for (float& k : kernel) k /= sum;
     
+    // Horizontal pass with boundary renormalization
     std::vector<std::vector<float>> temp(h, std::vector<float>(w, 0));
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
-            float val = 0;
+            float val = 0, wsum = 0;
             for (int kx = 0; kx < kernel_size; kx++) {
-                int sx = x + kx - kernel_size / 2;
+                int sx = x + kx - half;
                 if (sx >= 0 && sx < w) {
                     val += img[y][sx] * kernel[kx];
+                    wsum += kernel[kx];
                 }
             }
-            temp[y][x] = val;
+            temp[y][x] = val / wsum;
         }
     }
     
+    // Vertical pass with boundary renormalization
     std::vector<std::vector<float>> result(h, std::vector<float>(w, 0));
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
-            float val = 0;
+            float val = 0, wsum = 0;
             for (int ky = 0; ky < kernel_size; ky++) {
-                int sy = y + ky - kernel_size / 2;
+                int sy = y + ky - half;
                 if (sy >= 0 && sy < h) {
                     val += temp[sy][x] * kernel[ky];
+                    wsum += kernel[ky];
                 }
             }
-            result[y][x] = val;
+            result[y][x] = val / wsum;
         }
     }
     return result;
 }
 
-HarrisResult detect_harris_corners(const ImageData& img, float k, int threshold, int nms_size) {
+// ─────────────────────────────────────────────────────────────
+//  Harris corner detector
+//
+//  Improvements over the previous version:
+//    1. Proper 3×3 Sobel gradients (noise-resistant)
+//    2. Adaptive threshold (% of max response)
+//    3. Larger NMS window (7×7)
+//    4. Top-500 cap on keypoints
+//    5. Boundary-safe Gaussian blur
+// ─────────────────────────────────────────────────────────────
+
+HarrisResult detect_harris_corners(const ImageData& img, float k, int /*threshold*/, int nms_size) {
     auto start = std::chrono::high_resolution_clock::now();
     
     ImageData gray = img.channels > 1 ? grayscale(img) : img;
     auto [Ix, Iy] = compute_gradients(gray);
     
     // Compute structure tensor components with Gaussian blur
-    auto Ixx = gaussian_blur(compute_elementwise_product(Ix, Ix), 1.5f);
-    auto Iyy = gaussian_blur(compute_elementwise_product(Iy, Iy), 1.5f);
-    auto Ixy = gaussian_blur(compute_elementwise_product(Ix, Iy), 1.5f);
+    auto Ixx = gaussian_blur_harris(compute_elementwise_product(Ix, Ix), 1.5f);
+    auto Iyy = gaussian_blur_harris(compute_elementwise_product(Iy, Iy), 1.5f);
+    auto Ixy = gaussian_blur_harris(compute_elementwise_product(Ix, Iy), 1.5f);
     
     int w = gray.width, h = gray.height;
     std::vector<std::vector<float>> R(h, std::vector<float>(w, 0));
     
+    // Compute Harris response R = det(M) - k * trace(M)^2
+    float max_R = 0.0f;
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
             float det = Ixx[y][x] * Iyy[y][x] - Ixy[y][x] * Ixy[y][x];
             float trace = Ixx[y][x] + Iyy[y][x];
             R[y][x] = det - k * trace * trace;
+            if (R[y][x] > max_R) max_R = R[y][x];
         }
     }
     
-    // Non-maximum suppression
-    std::vector<Keypoint> keypoints;
+    // Adaptive threshold: 1% of the maximum response value
+    float adaptive_thresh = 0.01f * max_R;
+    
+    // Non-maximum suppression with larger window (7×7)
+    nms_size = std::max(nms_size, 7);
     int nms_radius = nms_size / 2;
+    
+    std::vector<Keypoint> keypoints;
     
     for (int y = nms_radius; y < h - nms_radius; y++) {
         for (int x = nms_radius; x < w - nms_radius; x++) {
             float val = R[y][x];
-            if (val < threshold) continue;
+            if (val < adaptive_thresh) continue;
             
             bool is_max = true;
             for (int dy = -nms_radius; dy <= nms_radius && is_max; dy++) {
@@ -118,10 +170,17 @@ HarrisResult detect_harris_corners(const ImageData& img, float k, int threshold,
         }
     }
     
+    // Keep top 500 by response strength
+    std::sort(keypoints.begin(), keypoints.end(),
+              [](const Keypoint& a, const Keypoint& b) {
+                  return a.response > b.response;
+              });
+    if (keypoints.size() > 500) keypoints.resize(500);
+    
     // Draw result
     ImageData result = img;
     for (const auto& kp : keypoints) {
-        draw_circle(result, static_cast<int>(kp.x), static_cast<int>(kp.y), 3,199, 30, 100);
+        draw_circle(result, static_cast<int>(kp.x), static_cast<int>(kp.y), 3, 199, 30, 100);
     }
     
     auto end = std::chrono::high_resolution_clock::now();

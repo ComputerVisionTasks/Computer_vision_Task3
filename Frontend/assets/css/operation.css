@@ -541,8 +541,8 @@
 /* ===== MATCHING TAB ===== */
 .matching-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  grid-template-columns: 1fr;
+  gap: 24px;
 }
 
 .match-card {

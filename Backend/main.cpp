@@ -32,7 +32,7 @@ void load_case_study_images() {
             if (entry.path().extension() == ".jpg" || entry.path().extension() == ".png") {
                 ImageData img = load_image(entry.path().string());
                 if (!img.data.empty()) {
-                    uploaded_images.push_back(resize_image(img, 640, 480));
+                    uploaded_images.push_back(resize_image(img, 1280, 720));
                 }
             }
         }
@@ -40,7 +40,7 @@ void load_case_study_images() {
     
     // If no images found, create dummy test images
     if (uploaded_images.empty()) {
-        int w = 640, h = 480;
+        int w = 1280, h = 720;
         ImageData dummy1 = create_blank_image(w, h, 3);
         ImageData dummy2 = create_blank_image(w, h, 3);
         
@@ -113,7 +113,7 @@ int main() {
                 std::string base64_str = img_base64.get<std::string>();
                 ImageData img = decode_base64_image(base64_str);
                 if (!img.data.empty()) {
-                    uploaded_images.push_back(resize_image(img, 640, 480));
+                    uploaded_images.push_back(resize_image(img, 1280, 720));
                 }
             }
         }

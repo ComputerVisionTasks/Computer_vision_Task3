@@ -60,14 +60,11 @@ static float compute_ncc(const std::vector<float>& a, const std::vector<float>& 
 //  against any image background.
 // ─────────────────────────────────────────────────────────────
 
-static void quality_color(float t, uint8_t& r, uint8_t& g, uint8_t& b) {
-    // Clamp t
-    t = std::max(0.0f, std::min(1.0f, t));
-
-    // Hue: 120° (green) → 0° (red) as t goes 0 → 1
-    float hue = (1.0f - t) * 120.0f;   // degrees
-    float s   = 1.0f;
-    float v   = 1.0f;
+static void distinct_color(int idx, uint8_t& r, uint8_t& g, uint8_t& b) {
+    // Generate highly distinguishable colors using the golden angle (137.508°)
+    float hue = std::fmod(idx * 137.508f, 360.0f);
+    float s   = 0.9f; // Slightly less than 1.0 to look pleasant
+    float v   = 0.95f;
 
     // HSV → RGB conversion
     float h = hue / 60.0f;
@@ -134,19 +131,20 @@ static ImageData build_vis(const ImageData& img1, const ImageData& img2,
     for (int i = 0; i < num_lines; i++) {
         const auto& m = matches[i];
 
-        // t = 0 for the best match, t = 1 for the worst drawn match
-        float t = (num_lines > 1)
-                  ? static_cast<float>(i) / static_cast<float>(num_lines - 1)
-                  : 0.0f;
-
         uint8_t r, g, b;
-        quality_color(t, r, g, b);
+        distinct_color(i, r, g, b);
 
-        draw_line(vis,
-                  static_cast<int>(kp1[m.idx1].x), static_cast<int>(kp1[m.idx1].y),
-                  static_cast<int>(kp2[m.idx2].x) + img1.width,
-                  static_cast<int>(kp2[m.idx2].y),
-                  r, g, b, 2);
+        int x1 = static_cast<int>(kp1[m.idx1].x);
+        int y1 = static_cast<int>(kp1[m.idx1].y);
+        int x2 = static_cast<int>(kp2[m.idx2].x) + img1.width;
+        int y2 = static_cast<int>(kp2[m.idx2].y);
+
+        // Draw line with thickness 3
+        draw_line(vis, x1, y1, x2, y2, r, g, b, 3);
+        
+        // Draw circles at start and end points
+        draw_circle(vis, x1, y1, 10, r, g, b);
+        draw_circle(vis, x2, y2, 10, r, g, b);
     }
 
     return vis;
