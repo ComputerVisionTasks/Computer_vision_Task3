@@ -10,12 +10,14 @@ This project implements a classical Computer Vision pipeline for interest point 
 
 ## Algorithm Specifications
 
-### 1. Interest Point Detection (Harris Corner Detector)
-The Harris feature detector identifies regions in the image with significant intensity variation in multiple directions.
+### 1. Interest Point Detection (Harris & Shi-Tomasi / Lambda Method)
+The backend supports two classical and reliable corner scoring mechanisms. Both start by identifying regions with significant intensity variation.
 * **Preprocessing:** Calculates gradients internally using appropriate $3 \times 3$ Sobel kernels to ensure noise robustness.
 * **Structure Tensor:** Computes $Ix^2$, $Iy^2$, and $Ix \cdot Iy$ and filters them using separable Gaussian blurs.
-* **Response Calculation:** Computes the corner response $R = \det(M) - k \cdot \operatorname{trace}(M)^2$. 
-* **Keypoint Extraction:** Applies adaptive thresholding (proportional to the maximum response) followed by a $7 \times 7$ window Non-Maximal Suppression (NMS). The top 3,000 keypoints are passed to the descriptor.
+* **Response Calculation:**
+  * **Harris:** Computes the corner response $R = \det(M) - k \cdot \operatorname{trace}(M)^2$.
+  * **Shi-Tomasi (Lambda Method):** Computes $R = \min(\lambda_1, \lambda_2)$ by extracting the exact minimum eigenvalue of the structure tensor directly, making the detector more stable under affine variations.
+* **Keypoint Extraction:** Applies thresholding followed by a $7 \times 7$ window Non-Maximal Suppression (NMS). The strongest keypoints (capped at 3,000) are extracted.
 
 ### 2. Local Feature Description (SIFT-Like Descriptor)
 Each detected interest point is encoded into an invariant vector.
