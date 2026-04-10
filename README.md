@@ -1,4 +1,21 @@
-# Computer Vision Pipeline: Feature Detection and Matching
+<p align="center">
+  <img src="readme_images/Logo-Cv-03.png" alt="FromScratchCV Logo" width="220"/>
+</p>
+
+<p align="center">
+  <b>Feature Detection & Matching — Built from Scratch in C++
+</p>
+
+<p align="center">
+  <img src="readme_images/banner (2).jpg" alt="Project Banner" width="100%"/>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Language-C%2B%2B17-blue?style=for-the-badge&logo=c%2B%2B" alt="C++17"/>
+  <img src="https://img.shields.io/badge/Frontend-HTML%2FJS%2FCSS-orange?style=for-the-badge" alt="Frontend"/>
+  <img src="https://img.shields.io/badge/Server-cpp--httplib-green?style=for-the-badge" alt="httplib"/>
+  <img src="https://img.shields.io/badge/Build-CMake-red?style=for-the-badge&logo=cmake" alt="CMake"/>
+</p>
 
 ## Overview
 This project implements a full classical computer vision pipeline from scratch:
@@ -12,9 +29,6 @@ The system is split into a C++ backend (REST API) and a browser-based frontend f
 ## Architecture
 - Backend (C++): Implements image processing and exposes API endpoints using `httplib`.
 - Frontend (HTML/CSS/JS): Lets you upload images, choose operations, and view visual results.
-
-### UI Preview
-![Frontend UI](readme_images/ui.png)
 
 ## Algorithms
 
