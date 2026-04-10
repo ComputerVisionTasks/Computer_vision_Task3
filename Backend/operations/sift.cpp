@@ -17,32 +17,43 @@
 static std::vector<std::vector<float>> to_float(const ImageData& img) {
     ImageData gray = img.channels > 1 ? grayscale(img) : img;
     std::vector<std::vector<float>> out(gray.height, std::vector<float>(gray.width));
+    // Convert [0,255] bytes to [0,1] float intensities for numeric processing.
     for (int y = 0; y < gray.height; y++)
         for (int x = 0; x < gray.width; x++)
             out[y][x] = gray.data[y * gray.width + x] / 255.0f;
     return out;
 }
 
-static void draw_hollow_circle_sift(ImageData& img, int cx, int cy, int radius, int thickness, uint8_t r, uint8_t g, uint8_t b) {
+static void draw_hollow_circle_sift(
+        ImageData& img,
+        int center_x,
+        int center_y,
+        int radius,
+        int thickness,
+        uint8_t color_r,
+        uint8_t color_g,
+        uint8_t color_b) {
+
     if (radius <= 0) return;
     thickness = std::max(1, thickness);
 
-    int outer2 = radius * radius;
-    int inner = std::max(0, radius - thickness);
-    int inner2 = inner * inner;
+    // Keep only the annulus [inner_radius, outer_radius] to draw a hollow ring.
+    int outer_radius_sq = radius * radius;
+    int inner_radius = std::max(0, radius - thickness);
+    int inner_radius_sq = inner_radius * inner_radius;
 
-    for (int y = -radius; y <= radius; y++) {
-        for (int x = -radius; x <= radius; x++) {
-            int d2 = x * x + y * y;
-            if (d2 <= outer2 && d2 >= inner2) {
-                int px = cx + x;
-                int py = cy + y;
-                if (px >= 0 && px < img.width && py >= 0 && py < img.height) {
-                    int idx = (py * img.width + px) * img.channels;
+    for (int offset_y = -radius; offset_y <= radius; offset_y++) {
+        for (int offset_x = -radius; offset_x <= radius; offset_x++) {
+            int squared_distance = offset_x * offset_x + offset_y * offset_y;
+            if (squared_distance <= outer_radius_sq && squared_distance >= inner_radius_sq) {
+                int pixel_x = center_x + offset_x;
+                int pixel_y = center_y + offset_y;
+                if (pixel_x >= 0 && pixel_x < img.width && pixel_y >= 0 && pixel_y < img.height) {
+                    int pixel_index = (pixel_y * img.width + pixel_x) * img.channels;
                     if (img.channels >= 3) {
-                        img.data[idx] = r;
-                        img.data[idx + 1] = g;
-                        img.data[idx + 2] = b;
+                        img.data[pixel_index] = color_r;
+                        img.data[pixel_index + 1] = color_g;
+                        img.data[pixel_index + 2] = color_b;
                     }
                 }
             }
@@ -331,133 +342,223 @@ static std::vector<float> descriptor(
 
 SIFTResult extract_sift_features(const ImageData& img) {
 
-    auto t0 = std::chrono::high_resolution_clock::now();
+    // Start timing (for performance measurement)
+    auto start_time = std::chrono::high_resolution_clock::now();
 
-    auto base = to_float(img);
+    // Convert image to float for precise computations
+    auto base_image = to_float(img);
 
-    const int   oct  = 4;
-    const int   lvl  = 6;        // scales per octave (including extras for DoG)
-    const float sig0 = 1.6f;
-    const float k    = std::pow(2.0f, 1.0f / (float)(lvl - 3));
+    // ---- SIFT parameters ----
+    const int octave_count = 4;          // Number of pyramid layers (multi-resolution)
+    const int levels_per_octave = 6;     // Number of blur levels per octave
+    const float base_sigma = 1.6f;       // Initial Gaussian blur (standard in SIFT)
+
+    // k = scale factor between levels
+    const float scale_step = std::pow(2.0f, 1.0f / (float)(levels_per_octave - 3));
 
     // ---- build scale-space ----
-    // G[o][l]  = Gaussian images
-    // D[o][l]  = DoG images (lvl-1 per octave)
+    // gaussian_pyramid[octave][level] = blurred image
+    // dog_pyramid[octave][level]      = Difference of Gaussian images
     using Img2D  = std::vector<std::vector<float>>;
     using ImgSet = std::vector<Img2D>;
 
-    std::vector<ImgSet> G, D;
+    std::vector<ImgSet> gaussian_pyramid, dog_pyramid;
 
-    Img2D cur = gaussian_blur(base, sig0);
+    // First image is blurred with base sigma
+    Img2D octave_seed = gaussian_blur(base_image, base_sigma);
 
-    for (int o = 0; o < oct; o++) {
-        ImgSet g;
-        g.push_back(cur);
+    // Loop over octaves (multi-scale representation)
+    for (int octave_index = 0; octave_index < octave_count; octave_index++) {
 
-        float sp = sig0;
-        for (int l = 1; l < lvl; l++) {
-            float st = sig0 * std::pow(k, (float)l);
-            float sd = std::sqrt(std::max(1e-4f, st*st - sp*sp));
-            g.push_back(gaussian_blur(g.back(), sd));
-            sp = st;
+        ImgSet gaussian_levels;
+
+        // First level of octave
+        gaussian_levels.push_back(octave_seed);
+
+        float previous_sigma = base_sigma;
+
+        // Build Gaussian pyramid levels
+        for (int level_index = 1; level_index < levels_per_octave; level_index++) {
+
+            // Desired sigma for this level
+            float target_sigma = base_sigma * std::pow(scale_step, (float)level_index);
+
+            // Incremental blur (difference from previous level)
+            float incremental_sigma = std::sqrt(std::max(1e-4f,
+                target_sigma * target_sigma - previous_sigma * previous_sigma));
+
+            // Apply blur incrementally
+            gaussian_levels.push_back(
+                gaussian_blur(gaussian_levels.back(), incremental_sigma)
+            );
+
+            previous_sigma = target_sigma;
         }
-        G.push_back(g);
 
-        ImgSet d;
-        for (int l = 1; l < lvl; l++)
-            d.push_back(dog(g[l-1], g[l]));
-        D.push_back(d);
+        // Store Gaussian levels
+        gaussian_pyramid.push_back(gaussian_levels);
 
-        // seed for next octave from s=lvl-3 (so DoG peak range is correct)
-        if (o < oct-1) cur = downsample(g[lvl-3]);
+        // ---- Build DoG pyramid ----
+        ImgSet dog_levels;
+
+        for (int level_index = 1; level_index < levels_per_octave; level_index++) {
+            // DoG = difference between consecutive Gaussian images
+            dog_levels.push_back(
+                dog(gaussian_levels[level_index - 1], gaussian_levels[level_index])
+            );
+        }
+
+        dog_pyramid.push_back(dog_levels);
+
+        // ---- Prepare next octave ----
+        // Take a middle level and downsample (reduce resolution)
+        if (octave_index < octave_count - 1)
+            octave_seed = downsample(gaussian_levels[levels_per_octave - 3]);
     }
 
     // ---- detect & describe keypoints ----
-    std::vector<Keypoint> kps;
+    std::vector<Keypoint> keypoints;
 
-    const float contrast_thresh = 0.06f / (float)(lvl - 3); // per-level threshold
+    // Threshold to remove weak points (low contrast)
+    const float contrast_threshold = 0.06f / (float)(levels_per_octave - 3);
 
-    for (int o = 0; o < oct; o++) {
-        int nd = (int)D[o].size();
-        int h  = (int)D[o][0].size();
-        int w  = (int)D[o][0][0].size();
+    // Loop over octaves
+    for (int octave_index = 0; octave_index < octave_count; octave_index++) {
 
-        for (int l = 1; l < nd-1; l++)
-        for (int y = 1; y < h-1;  y++)
-        for (int x = 1; x < w-1;  x++) {
+        int dog_level_count = (int)dog_pyramid[octave_index].size();
+        int image_height = (int)dog_pyramid[octave_index][0].size();
+        int image_width  = (int)dog_pyramid[octave_index][0][0].size();
 
-            float v = D[o][l][y][x];
+        // Skip first and last level (need neighbors in scale)
+        for (int level_index = 1; level_index < dog_level_count - 1; level_index++)
+        for (int y = 1; y < image_height - 1; y++)
+        for (int x = 1; x < image_width - 1; x++) {
 
-            // cheap preliminary contrast gate
-            if (std::fabs(v) < 0.5f * contrast_thresh) continue;
+            float dog_value = dog_pyramid[octave_index][level_index][y][x];
 
-            // 3-D extremum test (26-neighbourhood)
-            bool extremum = true;
-            for (int dl = -1; dl <= 1 && extremum; dl++)
-            for (int dy = -1; dy <= 1 && extremum; dy++)
-            for (int dx = -1; dx <= 1; dx++) {
-                if (!dl && !dy && !dx) continue;
-                float nb = D[o][l+dl][y+dy][x+dx];
-                if ((v > 0 && nb >= v) || (v < 0 && nb <= v)) extremum = false;
+            // ---- Step 1: quick contrast filtering ----
+            if (std::fabs(dog_value) < 0.5f * contrast_threshold) continue;
+
+            // ---- Step 2: check if pixel is local extrema ----
+            // Compare with 26 neighbors (3x3x3 cube in scale-space)
+            bool is_extremum = true;
+
+            for (int d_level = -1; d_level <= 1 && is_extremum; d_level++)
+            for (int d_row   = -1; d_row <= 1 && is_extremum; d_row++)
+            for (int d_col   = -1; d_col <= 1; d_col++) {
+
+                // Skip center point
+                if (!d_level && !d_row && !d_col) continue;
+
+                float neighbor_value =
+                    dog_pyramid[octave_index][level_index + d_level][y + d_row][x + d_col];
+
+                // Check max or min condition
+                if ((dog_value > 0 && neighbor_value >= dog_value) ||
+                    (dog_value < 0 && neighbor_value <= dog_value)) {
+                    is_extremum = false;
+                }
             }
-            if (!extremum) continue;
 
-            // subpixel refinement
-            float xr, yr, lr, ival;
-            if (!refine(D[o], l, y, x, xr, yr, lr, ival)) continue;
+            if (!is_extremum) continue;
 
-            // contrast threshold on interpolated value
-            if (std::fabs(ival) < contrast_thresh) continue;
+            // ---- Step 3: refine keypoint location ----
+            float x_offset, y_offset, level_offset, interpolated_value;
 
-            // edge rejection
-            if (!edge_response_ok(D[o][l], y, x)) continue;
+            if (!refine(dog_pyramid[octave_index], level_index, y, x,
+                        x_offset, y_offset, level_offset, interpolated_value)) {
+                continue; // discard unstable points
+            }
 
-            // scale in image coordinates
-            float scale = sig0 * std::pow(k, (float)l + lr) * std::pow(2.0f, (float)o);
+            // Reject low contrast after refinement
+            if (std::fabs(interpolated_value) < contrast_threshold) continue;
 
-            const Img2D& gimg = G[o][l];
-            float xs = (float)x + xr;
-            float ys = (float)y + yr;
+            // ---- Step 4: remove edge-like points ----
+            if (!edge_response_ok(dog_pyramid[octave_index][level_index], y, x))
+                continue;
 
-            auto oris = orientations(gimg, xs, ys, sig0 * std::pow(k, (float)l));
+            // ---- Step 5: compute scale of keypoint ----
+            float keypoint_scale =
+                base_sigma *
+                std::pow(scale_step, (float)level_index + level_offset) *
+                std::pow(2.0f, (float)octave_index);
 
-            for (float ori : oris) {
-                Keypoint kp;
-                kp.x           = xs * std::pow(2.0f, (float)o);
-                kp.y           = ys * std::pow(2.0f, (float)o);
-                kp.scale       = scale;
-                kp.response    = ival;
-                kp.orientation = ori;
-                kp.descriptor  = descriptor(gimg, xs, ys,
-                                             sig0 * std::pow(k, (float)l), ori);
-                kps.push_back(kp);
+            // Get corresponding Gaussian image
+            const Img2D& gaussian_image = gaussian_pyramid[octave_index][level_index];
+
+            // Refined position
+            float refined_x = (float)x + x_offset;
+            float refined_y = (float)y + y_offset;
+
+            // ---- Step 6: assign orientation(s) ----
+            auto dominant_orientations = orientations(
+                gaussian_image,
+                refined_x,
+                refined_y,
+                base_sigma * std::pow(scale_step, (float)level_index)
+            );
+
+            // ---- Step 7: build descriptor ----
+            for (float orientation : dominant_orientations) {
+
+                Keypoint keypoint;
+
+                // Convert coordinates to original image scale
+                keypoint.x = refined_x * std::pow(2.0f, (float)octave_index);
+                keypoint.y = refined_y * std::pow(2.0f, (float)octave_index);
+
+                keypoint.scale = keypoint_scale;
+                keypoint.response = interpolated_value;
+                keypoint.orientation = orientation;
+
+                // Descriptor = 128-dim vector
+                keypoint.descriptor = descriptor(
+                    gaussian_image,
+                    refined_x,
+                    refined_y,
+                    base_sigma * std::pow(scale_step, (float)level_index),
+                    orientation
+                );
+
+                keypoints.push_back(keypoint);
             }
         }
     }
 
     // keep top 500 by |response|
-    std::sort(kps.begin(), kps.end(),
+    std::sort(keypoints.begin(), keypoints.end(),
               [](const Keypoint& a, const Keypoint& b) {
                   return std::fabs(a.response) > std::fabs(b.response);
               });
-    if (kps.size() > 500) kps.resize(500);
+    if (keypoints.size() > 500) keypoints.resize(500);
 
     // ---- visualise ----
-    ImageData out = img;
-    for (const auto& kp : kps) {
-        int radius = std::max(4, (int)std::lround(kp.scale));
-        draw_hollow_circle_sift(out, (int)kp.x, (int)kp.y, radius, 2, 199, 30, 100);
-        int x2 = (int)(kp.x + 8.0f * std::cos(kp.orientation));
-        int y2 = (int)(kp.y + 8.0f * std::sin(kp.orientation));
-        draw_line(out, (int)kp.x, (int)kp.y, x2, y2, 199, 30, 100);
+    ImageData output_image = img;
+    for (const auto& keypoint : keypoints) {
+        // Convert detected scale to a display radius while preserving the old bold minimum size.
+        int blob_radius = std::max(4, (int)std::lround(keypoint.scale));
+        draw_hollow_circle_sift(
+            output_image,
+            (int)keypoint.x,
+            (int)keypoint.y,
+            blob_radius,
+            2,
+            199,
+            30,
+            100);
+
+        // Small orientation arrow for direction visualization.
+        int arrow_end_x = (int)(keypoint.x + 8.0f * std::cos(keypoint.orientation));
+        int arrow_end_y = (int)(keypoint.y + 8.0f * std::sin(keypoint.orientation));
+        draw_line(output_image, (int)keypoint.x, (int)keypoint.y, arrow_end_x, arrow_end_y, 199, 30, 100);
     }
 
-    auto t1 = std::chrono::high_resolution_clock::now();
+    auto end_time = std::chrono::high_resolution_clock::now();
 
-    SIFTResult r;
-    r.keypoints     = kps;
-    r.result_image  = out;
-    r.time_ms       = std::chrono::duration<double, std::milli>(t1 - t0).count();
-    r.num_keypoints = (int)kps.size();
-    return r;
+    SIFTResult result;
+    result.keypoints = keypoints;
+    result.result_image = output_image;
+    result.time_ms = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+    result.num_keypoints = (int)keypoints.size();
+    return result;
 }

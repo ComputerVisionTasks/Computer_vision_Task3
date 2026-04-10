@@ -7,7 +7,6 @@
 
 static std::vector<std::vector<float>> compute_elementwise_product(const std::vector<std::vector<float>>& a, const std::vector<std::vector<float>>& b);
 static std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> compute_gradients(const ImageData& gray);
-static std::vector<std::vector<float>> gaussian_blur(const std::vector<std::vector<float>>& img, float sigma);
 
 static std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> compute_gradients(const ImageData& gray) {
     int w = gray.width, h = gray.height;
@@ -22,49 +21,6 @@ static std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>
         }
     }
     return std::make_pair(Ix, Iy);
-}
-
-static std::vector<std::vector<float>> gaussian_blur(const std::vector<std::vector<float>>& img, float sigma) {
-    int h = img.size(), w = img[0].size();
-    int kernel_size = static_cast<int>(6 * sigma) | 1;
-    std::vector<float> kernel(kernel_size);
-    float sum = 0;
-    
-    for (int i = 0; i < kernel_size; i++) {
-        int x = i - kernel_size / 2;
-        kernel[i] = exp(-(x * x) / (2 * sigma * sigma));
-        sum += kernel[i];
-    }
-    for (float& k : kernel) k /= sum;
-    
-    std::vector<std::vector<float>> temp(h, std::vector<float>(w, 0));
-    for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w; x++) {
-            float val = 0;
-            for (int kx = 0; kx < kernel_size; kx++) {
-                int sx = x + kx - kernel_size / 2;
-                if (sx >= 0 && sx < w) {
-                    val += img[y][sx] * kernel[kx];
-                }
-            }
-            temp[y][x] = val;
-        }
-    }
-    
-    std::vector<std::vector<float>> result(h, std::vector<float>(w, 0));
-    for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w; x++) {
-            float val = 0;
-            for (int ky = 0; ky < kernel_size; ky++) {
-                int sy = y + ky - kernel_size / 2;
-                if (sy >= 0 && sy < h) {
-                    val += temp[sy][x] * kernel[ky];
-                }
-            }
-            result[y][x] = val;
-        }
-    }
-    return result;
 }
 
 ShiTomasiResult detect_shi_tomasi(const ImageData& img, float k, int threshold, int nms_size) {
