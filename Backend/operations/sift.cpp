@@ -22,6 +22,33 @@ static std::vector<std::vector<float>> to_float(const ImageData& img) {
     return out;
 }
 
+static void draw_hollow_circle_sift(ImageData& img, int cx, int cy, int radius, int thickness, uint8_t r, uint8_t g, uint8_t b) {
+    if (radius <= 0) return;
+    thickness = std::max(1, thickness);
+
+    int outer2 = radius * radius;
+    int inner = std::max(0, radius - thickness);
+    int inner2 = inner * inner;
+
+    for (int y = -radius; y <= radius; y++) {
+        for (int x = -radius; x <= radius; x++) {
+            int d2 = x * x + y * y;
+            if (d2 <= outer2 && d2 >= inner2) {
+                int px = cx + x;
+                int py = cy + y;
+                if (px >= 0 && px < img.width && py >= 0 && py < img.height) {
+                    int idx = (py * img.width + px) * img.channels;
+                    if (img.channels >= 3) {
+                        img.data[idx] = r;
+                        img.data[idx + 1] = g;
+                        img.data[idx + 2] = b;
+                    }
+                }
+            }
+        }
+    }
+}
+
 // ================================================================
 //  GAUSSIAN BLUR
 // ================================================================
@@ -462,7 +489,8 @@ SIFTResult extract_sift_features(const ImageData& img) {
     // ---- visualise ----
     ImageData out = img;
     for (const auto& kp : kps) {
-        draw_circle(out, (int)kp.x, (int)kp.y, 4, 199, 30, 100);
+        int radius = std::max(4, (int)std::lround(kp.scale));
+        draw_hollow_circle_sift(out, (int)kp.x, (int)kp.y, radius, 2, 199, 30, 100);
         int x2 = (int)(kp.x + 8.0f * std::cos(kp.orientation));
         int y2 = (int)(kp.y + 8.0f * std::sin(kp.orientation));
         draw_line(out, (int)kp.x, (int)kp.y, x2, y2, 199, 30, 100);
