@@ -50,4 +50,11 @@ std::vector<float> gaussian_kernel(float sigma);
 std::vector<std::vector<float>> gaussian_blur(
     const std::vector<std::vector<float>>& img, float sigma);
 
+// ─────────────────────────────────────────────────────────────
+//  Element-wise product of two same-size float 2-D images
+// ─────────────────────────────────────────────────────────────
+std::vector<std::vector<float>> compute_elementwise_product(
+    const std::vector<std::vector<float>>& a,
+    const std::vector<std::vector<float>>& b);
+
 #endif

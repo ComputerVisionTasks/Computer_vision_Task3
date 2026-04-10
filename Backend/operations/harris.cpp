@@ -6,7 +6,6 @@
 
 #include <utility>
 
-static std::vector<std::vector<float>> compute_elementwise_product(const std::vector<std::vector<float>>& a, const std::vector<std::vector<float>>& b);
 
 // ─────────────────────────────────────────────────────────────
 //  Sobel gradient computation (proper 3×3 kernels)
@@ -148,15 +147,4 @@ HarrisResult detect_harris_corners(const ImageData& img, float k, int threshold,
     
     return hr;
 }
-
-// Helper function for elementwise product
-static std::vector<std::vector<float>> compute_elementwise_product(const std::vector<std::vector<float>>& a, const std::vector<std::vector<float>>& b) {
-    int h = a.size(), w = a[0].size();
-    std::vector<std::vector<float>> result(h, std::vector<float>(w));
-    for (int i = 0; i < h; i++) {
-        for (int j = 0; j < w; j++) {
-            result[i][j] = a[i][j] * b[i][j];
-        }
-    }
-    return result;
-}
+

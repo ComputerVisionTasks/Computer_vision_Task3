@@ -1,11 +1,11 @@
 #include "lambda.h"
+#include "utils.h"
 #include <cmath>
 #include <algorithm>
 #include <queue>
 #include <utility>
 #include <chrono>
 
-static std::vector<std::vector<float>> compute_elementwise_product(const std::vector<std::vector<float>>& a, const std::vector<std::vector<float>>& b);
 static std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> compute_gradients(const ImageData& gray);
 
 static std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> compute_gradients(const ImageData& gray) {
@@ -98,14 +98,3 @@ ShiTomasiResult detect_shi_tomasi(const ImageData& img, float k, int threshold, 
     return hr;
 }
 
-// Helper function for elementwise product
-static std::vector<std::vector<float>> compute_elementwise_product(const std::vector<std::vector<float>>& a, const std::vector<std::vector<float>>& b) {
-    int h = a.size(), w = a[0].size();
-    std::vector<std::vector<float>> result(h, std::vector<float>(w));
-    for (int i = 0; i < h; i++) {
-        for (int j = 0; j < w; j++) {
-            result[i][j] = a[i][j] * b[i][j];
-        }
-    }
-    return result;
-}

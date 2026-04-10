@@ -224,6 +224,17 @@ std::vector<std::vector<float>> gaussian_blur(
     return out;
 }
 
+std::vector<std::vector<float>> compute_elementwise_product(
+        const std::vector<std::vector<float>>& a,
+        const std::vector<std::vector<float>>& b) {
+    int h = (int)a.size(), w = (int)a[0].size();
+    std::vector<std::vector<float>> result(h, std::vector<float>(w));
+    for (int i = 0; i < h; i++)
+        for (int j = 0; j < w; j++)
+            result[i][j] = a[i][j] * b[i][j];
+    return result;
+}
+
 ImageData resize_image(const ImageData& img, int new_width, int new_height) {
     if (img.width == new_width && img.height == new_height) return img;
     ImageData resized;
