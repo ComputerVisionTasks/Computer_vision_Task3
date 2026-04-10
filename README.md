@@ -23,9 +23,9 @@ Both detectors rely on local intensity variation and structure tensor analysis.
 
 - Preprocessing: Compute image gradients using $3 \times 3$ Sobel kernels.
 - Tensor terms: Build and smooth $I_x^2$, $I_y^2$, and $I_x I_y$.
-- Response:
-   - Harris: $R = \det(M) - k \cdot \operatorname{trace}(M)^2$
-   - Shi-Tomasi: $R = \min(\lambda_1, \lambda_2)$
+- Response
+   - Harris
+   - Shi-Tomasi
 - Keypoint selection: Threshold + non-maximum suppression ($7 \times 7$ window), capped at 3000 points.
 
 ![Harris / Lambda Result](readme_images/haris.png)
