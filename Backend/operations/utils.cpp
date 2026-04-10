@@ -235,6 +235,47 @@ std::vector<std::vector<float>> compute_elementwise_product(
     return result;
 }
 
+// ─────────────────────────────────────────────────────────────
+//  Sobel gradient computation (proper 3×3 kernels)
+//
+//  Sobel-X:  [-1  0  1]      Sobel-Y:  [-1 -2 -1]
+//            [-2  0  2]                [ 0  0  0]
+//            [-1  0  1]                [ 1  2  1]
+//
+//  Divides by 8 to normalize the kernel weights.
+// ─────────────────────────────────────────────────────────────
+std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>>
+    compute_gradients(const ImageData& gray) {
+
+    int w = gray.width, h = gray.height;
+    std::vector<std::vector<float>> Ix(h, std::vector<float>(w, 0));
+    std::vector<std::vector<float>> Iy(h, std::vector<float>(w, 0));
+
+    for (int y = 1; y < h - 1; y++) {
+        for (int x = 1; x < w - 1; x++) {
+            // Sobel-X
+            float gx = -1.0f * gray.data[(y-1) * w + (x-1)]
+                      + 1.0f * gray.data[(y-1) * w + (x+1)]
+                      - 2.0f * gray.data[(y)   * w + (x-1)]
+                      + 2.0f * gray.data[(y)   * w + (x+1)]
+                      - 1.0f * gray.data[(y+1) * w + (x-1)]
+                      + 1.0f * gray.data[(y+1) * w + (x+1)];
+
+            // Sobel-Y
+            float gy = -1.0f * gray.data[(y-1) * w + (x-1)]
+                      - 2.0f * gray.data[(y-1) * w + (x)]
+                      - 1.0f * gray.data[(y-1) * w + (x+1)]
+                      + 1.0f * gray.data[(y+1) * w + (x-1)]
+                      + 2.0f * gray.data[(y+1) * w + (x)]
+                      + 1.0f * gray.data[(y+1) * w + (x+1)];
+
+            Ix[y][x] = gx / 8.0f;
+            Iy[y][x] = gy / 8.0f;
+        }
+    }
+    return std::make_pair(Ix, Iy);
+}
+
 ImageData resize_image(const ImageData& img, int new_width, int new_height) {
     if (img.width == new_width && img.height == new_height) return img;
     ImageData resized;

@@ -6,22 +6,6 @@
 #include <utility>
 #include <chrono>
 
-static std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> compute_gradients(const ImageData& gray);
-
-static std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> compute_gradients(const ImageData& gray) {
-    int w = gray.width, h = gray.height;
-    std::vector<std::vector<float>> Ix(h, std::vector<float>(w, 0));
-    std::vector<std::vector<float>> Iy(h, std::vector<float>(w, 0));
-    
-    // Sobel operators
-    for (int y = 1; y < h - 1; y++) {
-        for (int x = 1; x < w - 1; x++) {
-            Ix[y][x] = (gray.data[(y) * w + (x+1)] - gray.data[(y) * w + (x-1)]) / 2.0f;
-            Iy[y][x] = (gray.data[(y+1) * w + x] - gray.data[(y-1) * w + x]) / 2.0f;
-        }
-    }
-    return std::make_pair(Ix, Iy);
-}
 
 ShiTomasiResult detect_shi_tomasi(const ImageData& img, float k, int threshold, int nms_size) {
     auto start = std::chrono::high_resolution_clock::now();

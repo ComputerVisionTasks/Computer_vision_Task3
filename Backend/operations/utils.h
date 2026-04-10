@@ -7,6 +7,7 @@
 #include <cmath>
 #include <algorithm>
 #include <cstdint>
+#include <utility>
 
 struct ImageData {
     int width;
@@ -56,5 +57,12 @@ std::vector<std::vector<float>> gaussian_blur(
 std::vector<std::vector<float>> compute_elementwise_product(
     const std::vector<std::vector<float>>& a,
     const std::vector<std::vector<float>>& b);
+
+// ─────────────────────────────────────────────────────────────
+//  Sobel gradient computation (proper 3×3 kernels)
+//  Returns (Ix, Iy) — both normalised by dividing by 8.
+// ─────────────────────────────────────────────────────────────
+std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>>
+    compute_gradients(const ImageData& gray);
 
 #endif
