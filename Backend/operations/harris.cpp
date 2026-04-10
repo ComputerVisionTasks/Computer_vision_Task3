@@ -1,4 +1,5 @@
 #include "harris.h"
+#include "utils.h"
 #include <cmath>
 #include <algorithm>
 #include <queue>
@@ -48,58 +49,6 @@ std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> comp
 }
 
 // ─────────────────────────────────────────────────────────────
-//  Separable Gaussian blur with proper boundary normalization
-// ─────────────────────────────────────────────────────────────
-
-std::vector<std::vector<float>> gaussian_blur_harris(const std::vector<std::vector<float>>& img, float sigma) {
-    int h = img.size(), w = img[0].size();
-    int kernel_size = static_cast<int>(6 * sigma) | 1;
-    int half = kernel_size / 2;
-    std::vector<float> kernel(kernel_size);
-    float sum = 0;
-    
-    for (int i = 0; i < kernel_size; i++) {
-        int x = i - half;
-        kernel[i] = exp(-(x * x) / (2 * sigma * sigma));
-        sum += kernel[i];
-    }
-    for (float& k : kernel) k /= sum;
-    
-    // Horizontal pass with boundary renormalization
-    std::vector<std::vector<float>> temp(h, std::vector<float>(w, 0));
-    for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w; x++) {
-            float val = 0, wsum = 0;
-            for (int kx = 0; kx < kernel_size; kx++) {
-                int sx = x + kx - half;
-                if (sx >= 0 && sx < w) {
-                    val += img[y][sx] * kernel[kx];
-                    wsum += kernel[kx];
-                }
-            }
-            temp[y][x] = val / wsum;
-        }
-    }
-    
-    // Vertical pass with boundary renormalization
-    std::vector<std::vector<float>> result(h, std::vector<float>(w, 0));
-    for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w; x++) {
-            float val = 0, wsum = 0;
-            for (int ky = 0; ky < kernel_size; ky++) {
-                int sy = y + ky - half;
-                if (sy >= 0 && sy < h) {
-                    val += temp[sy][x] * kernel[ky];
-                    wsum += kernel[ky];
-                }
-            }
-            result[y][x] = val / wsum;
-        }
-    }
-    return result;
-}
-
-// ─────────────────────────────────────────────────────────────
 //  Harris corner detector
 //
 //  Improvements over the previous version:
@@ -110,26 +59,31 @@ std::vector<std::vector<float>> gaussian_blur_harris(const std::vector<std::vect
 //    5. Boundary-safe Gaussian blur
 // ─────────────────────────────────────────────────────────────
 
-HarrisResult detect_harris_corners(const ImageData& img, float k, int /*threshold*/, int nms_size) {
+HarrisResult detect_harris_corners(const ImageData& img, float k, int threshold, int nms_size) {
     auto start = std::chrono::high_resolution_clock::now();
     
     ImageData gray = img.channels > 1 ? grayscale(img) : img;
     auto [Ix, Iy] = compute_gradients(gray);
     
     // Compute structure tensor components with Gaussian blur
-    auto Ixx = gaussian_blur_harris(compute_elementwise_product(Ix, Ix), 1.5f);
-    auto Iyy = gaussian_blur_harris(compute_elementwise_product(Iy, Iy), 1.5f);
-    auto Ixy = gaussian_blur_harris(compute_elementwise_product(Ix, Iy), 1.5f);
+    auto Ixx = gaussian_blur(compute_elementwise_product(Ix, Ix), 1.5f);
+    auto Iyy = gaussian_blur(compute_elementwise_product(Iy, Iy), 1.5f);
+    auto Ixy = gaussian_blur(compute_elementwise_product(Ix, Iy), 1.5f);
     
     int w = gray.width, h = gray.height;
+    
+    // make a 2d vector with zeros
     std::vector<std::vector<float>> R(h, std::vector<float>(w, 0));
     
     // Compute Harris response R = det(M) - k * trace(M)^2
     float max_R = 0.0f;
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
+            // det
             float det = Ixx[y][x] * Iyy[y][x] - Ixy[y][x] * Ixy[y][x];
+            // trace
             float trace = Ixx[y][x] + Iyy[y][x];
+            // Response 
             R[y][x] = det - k * trace * trace;
             if (R[y][x] > max_R) max_R = R[y][x];
         }

@@ -179,6 +179,51 @@ ImageData create_blank_image(int width, int height, int channels) {
     return img;
 }
 
+// ─────────────────────────────────────────────────────────────
+//  Shared Gaussian utilities
+// ─────────────────────────────────────────────────────────────
+
+std::vector<float> gaussian_kernel(float sigma) {
+    int r    = (int)std::ceil(3.0f * sigma);
+    int size = 2 * r + 1;
+    std::vector<float> k(size);
+    float sum = 0.0f;
+    for (int i = 0; i < size; i++) {
+        float x = (float)(i - r);
+        k[i] = std::exp(-(x * x) / (2.0f * sigma * sigma));
+        sum += k[i];
+    }
+    for (auto& v : k) v /= sum;
+    return k;
+}
+
+std::vector<std::vector<float>> gaussian_blur(
+        const std::vector<std::vector<float>>& img, float sigma) {
+
+    int h = (int)img.size(), w = (int)img[0].size();
+    auto k = gaussian_kernel(sigma);
+    int r  = (int)k.size() / 2;
+
+    // horizontal pass
+    std::vector<std::vector<float>> tmp(h, std::vector<float>(w, 0.0f));
+    for (int y = 0; y < h; y++)
+        for (int x = 0; x < w; x++)
+            for (int i = -r; i <= r; i++) {
+                int xx = std::clamp(x + i, 0, w - 1);
+                tmp[y][x] += img[y][xx] * k[i + r];
+            }
+
+    // vertical pass
+    std::vector<std::vector<float>> out(h, std::vector<float>(w, 0.0f));
+    for (int y = 0; y < h; y++)
+        for (int x = 0; x < w; x++)
+            for (int i = -r; i <= r; i++) {
+                int yy = std::clamp(y + i, 0, h - 1);
+                out[y][x] += tmp[yy][x] * k[i + r];
+            }
+    return out;
+}
+
 ImageData resize_image(const ImageData& img, int new_width, int new_height) {
     if (img.width == new_width && img.height == new_height) return img;
     ImageData resized;

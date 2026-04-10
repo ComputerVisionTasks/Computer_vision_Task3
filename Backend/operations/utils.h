@@ -42,4 +42,12 @@ void draw_circle(ImageData& img, int x, int y, int radius, uint8_t r, uint8_t g,
 void draw_line(ImageData& img, int x1, int y1, int x2, int y2, uint8_t r, uint8_t g, uint8_t b, int thickness = 1);
 ImageData decode_base64_image(const std::string& base64_str);
 
+// ─────────────────────────────────────────────────────────────
+//  Shared Gaussian blur (separable, boundary-safe via clamp)
+//  Works on float 2-D images; sigma controls the kernel width.
+// ─────────────────────────────────────────────────────────────
+std::vector<float> gaussian_kernel(float sigma);
+std::vector<std::vector<float>> gaussian_blur(
+    const std::vector<std::vector<float>>& img, float sigma);
+
 #endif
